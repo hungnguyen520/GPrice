@@ -5,13 +5,20 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
-
 import { useColorScheme } from '@/hooks/useColorScheme';
+
+import { FileLogger } from "react-native-file-logger";
+
+FileLogger.configure({
+  logsDirectory: '/Users/hungnguyen/root/gprice/logs',
+  maximumFileSize: 1024 * 100,
+  captureConsole: false
+});
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
@@ -37,3 +44,5 @@ export default function RootLayout() {
     </ThemeProvider>
   );
 }
+
+export default RootLayout
