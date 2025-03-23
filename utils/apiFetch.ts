@@ -71,22 +71,14 @@ export const getDOJIPrices = async (): Promise<IPriceData[]> => {
     const url = 'http://update.giavang.doji.vn/banggia/doji_92411/92411'
 
         const res = await axios.get(url)
-        .then(response => {
-            FileLogger.info('SUCCESS.request ====>' + JSON.stringify(response.data))
-        })
-        .catch((error) => {
-            FileLogger.error('error.request ====>' + JSON.stringify(error.request))
-        })
+        
+        FileLogger.error('error.request ====>' + JSON.stringify(error.request))
 
+        const data = await res.data;
 
-        // const data = await res.data;
+        const xml = new XMLParser().parseFromString(data);
 
-        // const xml = new XMLParser().parseFromString(data);
-
-        // console.log(666666, xml)
-
-
-   
+        FileLogger.info(xml)
 
    
     return []
