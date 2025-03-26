@@ -12,6 +12,6 @@ export const enum GType {
 export interface IPriceData extends Record<string, any> {
     group: GGroup
     type: GType
-    buyPrice: string
-    sellPrice: string
+    buy: string | number
+    sell: string | number
 }

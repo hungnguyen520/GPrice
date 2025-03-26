@@ -34,10 +34,17 @@ function TabLayout() {
         }}
       />
        <Tabs.Screen
-        name="g-price"
+        name="gprice"
         options={{
           title: 'GPrice',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="dollarsign.circle" color={color} />,
+        }}
+      />
+       <Tabs.Screen
+        name="explore"
+        options={{
+          title: 'Explore',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="message" color={color} />,
         }}
       />
     </Tabs>

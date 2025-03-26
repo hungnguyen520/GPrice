@@ -5,8 +5,10 @@ export const formatCurrency = (amount: number) => new Intl.NumberFormat('en-US',
 
 export const formatNumber = (number: number) => new Intl.NumberFormat().format(number);
 
-export const roundToThousand = (number: number) => {
-    return Math.round(number / 1000);
-};
-
-export const formatGPrice = (number: number) => formatNumber(roundToThousand(number))
+export const formatPrice = (price: string | number) => {
+    const priceStr = price.toString();
+    const firstNum = priceStr.slice(0, 2);
+    const lastNum = priceStr.slice(2, 4);
+    return firstNum + '.' + lastNum
+   
+}

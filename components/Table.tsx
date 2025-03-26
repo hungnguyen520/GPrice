@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { ThemedText } from './ThemedText';
 
 const sampleData = [
     { id: 1, name: 'John Doe', age: 28, city: 'New York' },
@@ -12,25 +13,25 @@ interface TableProps {
     data?: Record<string, number | string>[]
 }
 
-const Table: React.FC<TableProps> = ({ data = sampleData, ...props }) => {
+const Table: React.FC<TableProps> = ({ data = sampleData }) => {
 
     if(!data.length) {
-        return <Text>No data</Text>
+        return <ThemedText>No data</ThemedText>
     }
 
     const columnNames = Object.keys(data[0])
 
     return (
-        <View style={styles.container} {...props}>
+        <View style={styles.container}>
             <View style={styles.headerRow}>
                 {columnNames.map((colName) => (
-                    <Text key={colName} style={[styles.headerCell, styles.cell]}>{colName}</Text>
+                    <ThemedText key={colName} style={[styles.headerCell, styles.cell]}>{colName}</ThemedText>
                 ))}
             </View>
-            {data.map((row) => (
-                <View key={row.id} style={styles.row}>
+            {data.map((row, idx) => (
+                <View key={idx} style={styles.row}>
                     {columnNames.map((colName) => (
-                        <Text key={row[colName]} style={styles.cell}>{row[colName]}</Text>
+                        <ThemedText key={row[colName]} style={styles.cell}>{row[colName]}</ThemedText>
                     ))}
                 </View>
             ))}
@@ -41,13 +42,13 @@ const Table: React.FC<TableProps> = ({ data = sampleData, ...props }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        marginBottom: 16
     },
     headerRow: {
         flexDirection: 'row',
         borderBottomWidth: 1,
-        borderBottomColor: '#000',
+        borderBottomColor: '#ccc',
         paddingVertical: 8,
-        backgroundColor: '#f2f2f2',
     },
     row: {
         flexDirection: 'row',

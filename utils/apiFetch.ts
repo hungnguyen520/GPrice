@@ -1,8 +1,9 @@
 import axios from "axios";
-import { formatGPrice } from "./numberFormat";
 import { GGroup, GType, IPriceData } from "@/types";
 import XMLParser from 'react-xml-parser';
 import { FileLogger } from "react-native-file-logger";
+import { ColorSchemeName } from "react-native";
+import { formatPrice } from "./numberFormat";
 
 export const fetchSJCPrices = async (): Promise<IPriceData[]> => {
     const goldBarId = 1
@@ -26,24 +27,24 @@ export const fetchSJCPrices = async (): Promise<IPriceData[]> => {
         {
             group: GGroup.SJC,
             type: GType.Bar,
-            buyPrice: formatGPrice(bar.BuyValue),
-            sellPrice: formatGPrice(bar.SellValue)
+            buy: formatPrice(bar.BuyValue),
+            sell: formatPrice(bar.SellValue)
         },
         {
             group: GGroup.SJC,
             type: GType.Ring,
-            buyPrice: formatGPrice(ring.BuyValue),
-            sellPrice: formatGPrice(ring.SellValue)
+            buy: formatPrice(ring.BuyValue),
+            sell: formatPrice(ring.SellValue)
         }
     ]
 };
 
-export const getGlobalPriceURI = () => {
+export const getGlobalPriceURI = (theme: ColorSchemeName = "dark") => {
     const url = 'https://www.tradingview-widget.com/embed-widget/single-quote/?locale=vi_VN#'
     const config = {
         symbol: "OANDA:XAUUSD",
-        colorTheme: "light",
-        isTransparent: true,
+        colorTheme: theme,
+        isTransparent: false,
     }
     return encodeURI(url + JSON.stringify(config));
 }
@@ -54,15 +55,14 @@ export const getPNJPrices = async (): Promise<IPriceData[]> => {
     const d = await res.data;
 
     const code = 'N24K';
-
     const price = d?.data?.find((i) => i.masp === code)
 
     return [
         {
             group: GGroup.PNJ,
             type: GType.Ring,
-            buyPrice: formatGPrice(price.giamua * 10000),
-            sellPrice: formatGPrice(price.giaban * 10000)
+            buy: formatPrice(price.giamua),
+            sell: formatPrice(price.giaban)
         },
     ]
 }
@@ -70,18 +70,40 @@ export const getPNJPrices = async (): Promise<IPriceData[]> => {
 export const getDOJIPrices = async (): Promise<IPriceData[]> => {
     const url = 'http://update.giavang.doji.vn/banggia/doji_92411/92411'
 
-        const res = await axios.get(url)
-        
-        FileLogger.error('error.request ====>' + JSON.stringify(error.request))
+    const res = await axios.get(url)
+    const xml = await res.data;
+    const xmlObj = new XMLParser().parseFromString(xml);
 
-        const data = await res.data;
+    const name = 'LED'
+    const code = 'doji_3'
+    const priceTable = xmlObj?.children?.find(i => i.name === name)
+    const price = priceTable?.children?.find(i => i.attributes?.Key === code)
 
-        const xml = new XMLParser().parseFromString(data);
+    const toNumber = (priceStr: string) => priceStr ? parseInt(priceStr.replace(/,/g, '')) * 10000 : 0
 
-        FileLogger.info(xml)
+    return [
+        {
+            group: GGroup.DOJI,
+            type: GType.Ring,
+            buy: formatPrice(toNumber(price?.attributes?.Buy)),
+            sell: formatPrice(toNumber(price?.attributes?.Sell))
+        },
+    ]
+}
 
-   
-    return []
+export const getGlobalPrice = async () => {
+    try {
+        const url = 'https://giavang.org/the-gioi/'
+    const response = await axios.get(url);
+    const data = await response.data;
+    const xml = new XMLParser().parseFromString(data);
+    // const className = 'crypto-price'
+    // const priceSpan = xml.getElementsByTagName("span").find(i => i.attributes?.class === className)
+    FileLogger.info(JSON.stringify(xml))
+    } catch (error) {
+        FileLogger.error(JSON.stringify(error))
+    }
+    
 }
 
 export const getGPrices = async (): Promise<IPriceData[]> => {
@@ -89,7 +111,7 @@ export const getGPrices = async (): Promise<IPriceData[]> => {
     const pnjPrices = await getPNJPrices();
     const dojiPrices = await getDOJIPrices();
 
-    return [...sjcPrices, ...pnjPrices]
+    return [...sjcPrices, ...dojiPrices, ...pnjPrices]
 }
 
 export default getGPrices
