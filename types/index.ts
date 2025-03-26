@@ -15,3 +15,15 @@ export interface IPriceData extends Record<string, any> {
     buy: string | number
     sell: string | number
 }
+
+export interface IGlobalPrice {
+    ounceUSD: string,
+    taelUSD: string,
+    taelVND: string,
+    usdRate: string
+}
+
+export interface IExchangeRate {
+    code: 'AUD' | 'EUR' | 'YEN' | 'USD',
+    value: number
+}

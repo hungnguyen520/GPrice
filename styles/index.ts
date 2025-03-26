@@ -19,4 +19,6 @@ export const commonStyles = StyleSheet.create({
     }
 });
 
+export const parallaxIconSize = 260
+
 export default commonStyles
