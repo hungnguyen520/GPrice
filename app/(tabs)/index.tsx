@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Text, ActivityIndicator, StyleSheet, View } from 'react-native';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -9,7 +9,6 @@ import {
     getGPrices
 } from '@/utils/apiFetch';
 import { IGlobalPrice, IPriceData } from '@/types';
-import useForceRender from '@/hooks/useForceRender';
 import { WebView } from 'react-native-webview';
 import commonStyles, { parallaxIconSize } from '@/styles';
 import CustomButton from '@/components/CustomButton';
@@ -25,18 +24,18 @@ const getPageData = async () => {
     const data: IPageState = {};
     const errors: string[] = [];
     const [vnRes, gloRes] = await Promise.allSettled([
-        getGPrices,
-        getGlobalPrice
+        getGPrices(),
+        getGlobalPrice()
     ]);
 
     if (vnRes.status === 'fulfilled') {
-        data.prices = await vnRes.value();
+        data.prices = vnRes.value
     } else {
         errors.push(vnRes.reason.toString());
     }
 
     if (gloRes.status === 'fulfilled') {
-        data.globalPrice = await gloRes.value();
+        data.globalPrice = gloRes.value;
     } else {
         errors.push(gloRes.reason.toString());
     }
@@ -51,25 +50,35 @@ const Home = () => {
     const [pageData, setPageData] = useState<IPageState>();
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState<string[]>([]);
-    const { count, reRender } = useForceRender();
     const theme = useColorScheme() ?? 'dark';
 
-    useEffect(() => {
+    const refreshPage = useCallback(async (callback?: Function) => {
         setLoading(true);
-        getPageData()
-            .then(({ data, errors }) => {
-                setPageData(data);
-                setErrors(errors);
-            })
-            .catch((err) => {
-                setErrors([err.toString()]);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-    }, [count]);
+        const { data, errors } = await getPageData();
+        if(data) {
+            setPageData(data);
+        }
+        if(errors?.length) {
+            setErrors(errors);
+        }
+        setLoading(false);
+        callback?.();
+    }, []);
 
     const encodedUrl = getGlobalPriceURI(theme);
+
+    const tableData = pageData?.prices?.map(d => ({
+        group: d.group,
+        type: d.type,
+        buy: d.formatted?.buy,
+        sell: d.formatted?.sell
+    }));
+
+    const globalPrice = pageData?.globalPrice
+
+    useEffect(() => {
+        refreshPage();
+    }, []);
 
     return (
         <ParallaxScrollView
@@ -82,13 +91,8 @@ const Home = () => {
                     style={commonStyles.headerImage}
                 />
             }
+            onRefresh={refreshPage}
         >
-            <WebView
-                key={count}
-                source={{ uri: encodedUrl }}
-                style={styles.webview}
-            />
-
             {loading ? (
                 <ActivityIndicator size="large" />
             ) : (
@@ -98,49 +102,53 @@ const Home = () => {
                             {err}
                         </Text>
                     ))}
-                    {pageData?.globalPrice && (
+                    <WebView
+                        // key={count}
+                        source={{ uri: encodedUrl }}
+                        style={styles.webview}
+                    />
+                    {globalPrice && (
                         <View>
                             <View style={styles.globalPriceItem}>
                                 <ThemedText>Ounce</ThemedText>
                                 <ThemedText>
-                                    {pageData.globalPrice.ounceUSD}
+                                    {globalPrice.formatted?.ounceUSD}
                                 </ThemedText>
                             </View>
                             <View style={styles.globalPriceItem}>
                                 <ThemedText>Tael</ThemedText>
                                 <ThemedText>
-                                    {pageData.globalPrice.taelUSD}
+                                    {globalPrice.formatted?.taelUSD}
                                 </ThemedText>
                             </View>
                             <View style={styles.globalPriceItem}>
                                 <ThemedText>Rate USD</ThemedText>
                                 <ThemedText>
-                                    {pageData.globalPrice.usdRate}
+                                    {globalPrice.formatted?.usdRate}
                                 </ThemedText>
                             </View>
                             <View style={styles.globalPriceItem}>
                                 <ThemedText>Tael VND</ThemedText>
                                 <ThemedText>
-                                    {pageData.globalPrice.taelVND}
+                                    {globalPrice.formatted?.taelVND}
                                 </ThemedText>
                             </View>
                         </View>
                     )}
-                    {pageData?.prices?.length && (
+                    {tableData?.length && (
                         <View style={styles.tableContainer}>
-                            <Table data={pageData.prices} />
+                            <Table data={tableData} />
                         </View>
                     )}
+                    <CustomButton
+                        iconName="arrow.2.circlepath"
+                        borderColor={'green'}
+                        iconColor={'green'}
+                        backgroundColor={'transparent'}
+                        onPress={() => refreshPage()}
+                    />
                 </>
             )}
-
-            <CustomButton
-                iconName="arrow.2.circlepath"
-                borderColor={'green'}
-                iconColor={'green'}
-                backgroundColor={'transparent'}
-                onPress={() => reRender()}
-            />
         </ParallaxScrollView>
     );
 };

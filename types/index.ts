@@ -12,15 +12,25 @@ export const enum GType {
 export interface IPriceData extends Record<string, any> {
     group: GGroup
     type: GType
-    buy: string | number
-    sell: string | number
+    buy: number
+    sell: number
+    formatted?: {
+        buy: string
+        sell: string
+    }
 }
 
 export interface IGlobalPrice {
-    ounceUSD: string,
-    taelUSD: string,
-    taelVND: string,
-    usdRate: string
+    ounceUSD: number,
+    taelUSD: number,
+    taelVND: number,
+    rates: IExchangeRate[],
+    formatted?: {
+        ounceUSD: string,
+        taelUSD: string,
+        taelVND: string,
+        usdRate: string,
+    }
 }
 
 export interface IExchangeRate {

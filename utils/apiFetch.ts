@@ -33,14 +33,22 @@ export const fetchSJCPrices = async (): Promise<IPriceData[]> => {
         {
             group: GGroup.SJC,
             type: GType.Bar,
-            buy: formatPrice(bar.BuyValue),
-            sell: formatPrice(bar.SellValue)
+            buy: bar.BuyValue,
+            sell: bar.SellValue,
+            formatted: {
+                buy: formatPrice(bar.BuyValue),
+                sell: formatPrice(bar.SellValue),
+            }
         },
         {
             group: GGroup.SJC,
             type: GType.Ring,
-            buy: formatPrice(ring.BuyValue),
-            sell: formatPrice(ring.SellValue)
+            buy: ring.BuyValue,
+            sell: ring.SellValue,
+            formatted: {
+                buy: formatPrice(ring.BuyValue),
+                sell: formatPrice(ring.SellValue),
+            }
         }
     ];
 };
@@ -65,12 +73,19 @@ export const getPNJPrices = async (): Promise<IPriceData[]> => {
     const code = 'N24K';
     const price = d?.data?.find((i) => i.masp === code);
 
+    const buy = price.giamua * 10000
+    const sell =  price.giaban * 10000
+
     return [
         {
             group: GGroup.PNJ,
             type: GType.Ring,
-            buy: formatPrice(price.giamua),
-            sell: formatPrice(price.giaban)
+            buy,
+            sell,
+            formatted: {
+                buy: formatPrice(buy),
+                sell: formatPrice(sell),
+            }
         }
     ];
 };
@@ -90,12 +105,19 @@ export const getDOJIPrices = async (): Promise<IPriceData[]> => {
     const toIntNumber = (priceStr: string) =>
         priceStr ? parseInt(priceStr.replace(/,/g, '')) * 10000 : 0;
 
+    const buy = toIntNumber(price?.attributes?.Buy)
+    const sell = toIntNumber(price?.attributes?.Sell)
+
     return [
         {
             group: GGroup.DOJI,
             type: GType.Ring,
-            buy: formatPrice(toIntNumber(price?.attributes?.Buy)),
-            sell: formatPrice(toIntNumber(price?.attributes?.Sell))
+            buy,
+            sell,
+            formatted: {
+                buy: formatPrice(buy),
+                sell: formatPrice(sell)
+            }
         }
     ];
 };
@@ -116,25 +138,31 @@ export const getGlobalPrice = async (): Promise<IGlobalPrice | undefined> => {
         },
         operationName: 'MetalQuote'
     };
-    const response = await axios.post(url, body);
-    const data = await response.data;
-    const priceInOunceUSD = data.data?.GetMetalQuoteV3?.results?.[0]?.bid;
+    const [res, rates] = await Promise.all([
+        axios.post(url, body),
+        getExchangeRates()
+    ]);
+    const data = await res.data
+    const globalPrice = data.data?.GetMetalQuoteV3?.results?.[0]?.bid;
+    const priceInOunceUSD = typeof globalPrice === 'number' ? globalPrice : toNumber(globalPrice)
+    const priceInTaelUSD = priceInOunceUSD * taelPerOunceRate;
 
-    if (typeof priceInOunceUSD === 'number') {
-        const rates = await getExchangeRates();
-        const usdRate = rates?.find((i) => i.code === currency);
-        const priceInTaelUSD = priceInOunceUSD * taelPerOunceRate;
-        const usdRateValue = toNumber(usdRate?.value);
-        const priceInTaelVND = priceInTaelUSD * usdRateValue;
-        return {
-            ounceUSD: formatNumber(priceInOunceUSD),
-            taelUSD: formatNumber(priceInTaelUSD),
-            taelVND: formatPrice(priceInTaelVND),
-            usdRate: formatNumber(usdRateValue, 0)
-        };
-    }
+    const usdRate = rates?.find((i) => i.code === currency);
+    const usdRateValue = usdRate?.value || 0
+    const priceInTaelVND = priceInTaelUSD * usdRateValue;
 
-    return;
+    return {
+        ounceUSD: priceInOunceUSD,
+        taelUSD: priceInTaelUSD,
+        taelVND: priceInTaelVND,
+        rates,
+        formatted: {
+            ounceUSD: formatNumber(priceInOunceUSD, 2),
+            taelUSD: formatNumber(priceInTaelUSD, 2),
+            usdRate: formatNumber(usdRateValue),
+            taelVND: formatPrice(priceInTaelVND)
+        }
+    };
 };
 
 export const getExchangeRates = async (): Promise<IExchangeRate[]> => {
@@ -144,16 +172,17 @@ export const getExchangeRates = async (): Promise<IExchangeRate[]> => {
 
     return d.data?.map((i) => ({
         code: i.CurrencyCode,
-        value: i.Transfer
+        value: typeof i.Transfer === 'number' ? i.Transfer : toNumber(i.Transfer)
     }));
 };
 
 export const getGPrices = async (): Promise<IPriceData[]> => {
-    const sjcPrices = await fetchSJCPrices();
-    const pnjPrices = await getPNJPrices();
-    const dojiPrices = await getDOJIPrices();
-
-    return [...sjcPrices, ...dojiPrices, ...pnjPrices];
+    const [sjcPrices = [], pnjPrices = [], dojiPrices = []] = await Promise.all([
+        fetchSJCPrices(),
+        getPNJPrices(),
+        getDOJIPrices()
+    ]);
+    return [...sjcPrices, ...pnjPrices, ...dojiPrices];
 };
 
 export default getGPrices;

@@ -10,7 +10,7 @@ const sampleData = [
 ];
 
 interface TableProps {
-    data?: Record<string, number | string>[]
+    data?: Record<string, number | string | undefined>[]
 }
 
 const Table: React.FC<TableProps> = ({ data = sampleData }) => {
