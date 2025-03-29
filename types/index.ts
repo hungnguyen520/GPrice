@@ -37,3 +37,23 @@ export interface IExchangeRate {
     code: 'AUD' | 'EUR' | 'YEN' | 'USD',
     value: number
 }
+
+export interface HistoricalRecord {
+    group: GGroup
+    type: GType
+    buy: number
+    quantity: number
+    date: string
+}
+
+export interface HistoricalData {
+    data: HistoricalRecord[],
+    exclude: {
+        quantity: number,
+        value: number
+    }
+}
+export interface IPageState {
+    prices?: IPriceData[];
+    globalPrice?: IGlobalPrice;
+}

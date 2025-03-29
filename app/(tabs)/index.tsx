@@ -8,17 +8,15 @@ import {
     getGlobalPriceURI,
     getGPrices
 } from '@/utils/apiFetch';
-import { IGlobalPrice, IPriceData } from '@/types';
+import { IPageState } from '@/types';
 import { WebView } from 'react-native-webview';
 import commonStyles, { parallaxIconSize } from '@/styles';
 import CustomButton from '@/components/CustomButton';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { ThemedText } from '@/components/ThemedText';
-
-interface IPageState {
-    prices?: IPriceData[];
-    globalPrice?: IGlobalPrice;
-}
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '@/store';
+import { setAppData } from '@/store/appDataSlice';
 
 const getPageData = async () => {
     const data: IPageState = {};
@@ -47,16 +45,17 @@ const getPageData = async () => {
 };
 
 const Home = () => {
-    const [pageData, setPageData] = useState<IPageState>();
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState<string[]>([]);
     const theme = useColorScheme() ?? 'dark';
+    const pageData = useSelector((state: RootState) => state.appData)
+    const dispatch = useDispatch()
 
     const refreshPage = useCallback(async (callback?: Function) => {
         setLoading(true);
         const { data, errors } = await getPageData();
         if(data) {
-            setPageData(data);
+            dispatch(setAppData(data))
         }
         if(errors?.length) {
             setErrors(errors);
@@ -64,7 +63,7 @@ const Home = () => {
         setLoading(false);
         callback?.();
     }, []);
-
+    
     const encodedUrl = getGlobalPriceURI(theme);
 
     const tableData = pageData?.prices?.map(d => ({

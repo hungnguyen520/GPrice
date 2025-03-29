@@ -10,28 +10,30 @@ const sampleData = [
 ];
 
 interface TableProps {
-    data?: Record<string, number | string | undefined>[]
+    data?: Record<string,any>[]
+    fontSize?: number
 }
 
-const Table: React.FC<TableProps> = ({ data = sampleData }) => {
+const Table: React.FC<TableProps> = ({ data = sampleData, fontSize = 16 }) => {
 
     if(!data.length) {
         return <ThemedText>No data</ThemedText>
     }
-
-    const columnNames = Object.keys(data[0])
+    const sampleRow = data[0]
+    const columns = Object.keys(data[0])
+    const validColumns = columns.filter(col => typeof sampleRow[col] !== 'object')
 
     return (
         <View style={styles.container}>
             <View style={styles.headerRow}>
-                {columnNames.map((colName) => (
-                    <ThemedText key={colName} style={[styles.headerCell, styles.cell]}>{colName}</ThemedText>
+                {validColumns.map((colName) => (
+                    <ThemedText key={colName} style={[styles.headerCell, styles.cell, { fontSize }]}>{colName}</ThemedText>
                 ))}
             </View>
             {data.map((row, idx) => (
                 <View key={idx} style={styles.row}>
-                    {columnNames.map((colName) => (
-                        <ThemedText key={row[colName]} style={styles.cell}>{row[colName]}</ThemedText>
+                    {validColumns.map((colName, idx) => (
+                        <ThemedText key={idx} style={[styles.cell, { fontSize }]}>{row[colName]?.toString()}</ThemedText>
                     ))}
                 </View>
             ))}
@@ -63,7 +65,7 @@ const styles = StyleSheet.create({
         flex: 1,
         textAlign: 'center',
         minWidth: 50, // Minimum width for each cell
-        paddingHorizontal: 8,
+        paddingHorizontal: 6,
     },
 });
 
