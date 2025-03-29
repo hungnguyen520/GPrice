@@ -154,7 +154,7 @@ const Home = () => {
 
 const styles = StyleSheet.create({
     tableContainer: {
-        paddingBottom: 0
+        paddingBottom: 16
     },
     webview: {
         flex: 1,
