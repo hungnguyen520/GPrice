@@ -1,138 +1,113 @@
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import { RootState } from '@/store';
-import commonStyles, { parallaxIconSize } from '@/styles';
-import React from 'react';
-import { StyleSheet } from 'react-native';
-import { useSelector } from 'react-redux';
-import { GGroup, GType, HistoricalData } from '@/types';
-import history from '../../assets/history.json';
-import Table from '@/components/Table';
-import { format, getTime, parse } from 'date-fns';
-import { formatNumber, formatPrice } from '@/utils/numberFormat';
-
-const historicalData = history as HistoricalData;
-const historyTable = historicalData.data
-    .map((d) => ({
-        ...d,
-        date: parse(d.date, 'dd-MMM-yyyy', new Date())
-    }))
-    .sort((a, b) => getTime(b.date) - getTime(a.date))
-    .map((d) => ({
-        group: `${d.group} ${d.type.slice(0, 1)}`,
-        buy: d.buy,
-        quantity: d.quantity,
-        value: formatNumber(d.buy * d.quantity),
-        date: format(d.date, 'dd/MM/yy')
-    }));
-
-const sumHistoryQuantity = historicalData.data.reduce(
-    (sum, current) => (sum += current.quantity),
-    0
-);
-const sumHistoryBuy = historicalData.data.reduce(
-    (sum, current) => (sum += current.buy * current.quantity),
-    0
-);
-
-const exclude = historicalData.exclude;
-
-const historySumTable = [
-    {
-        title: 'Net History',
-        quantity: sumHistoryQuantity - exclude.quantity,
-        value: formatNumber(sumHistoryBuy - exclude.value)
-    },
-    {
-        title: 'Exclude',
-        quantity: exclude.quantity,
-        value: exclude.value
-    },
-    {
-        title: 'Gross History',
-        quantity: sumHistoryQuantity,
-        value: formatNumber(sumHistoryBuy)
-    }
-];
-
-const sumSjsBarQuantity = historicalData.data.reduce(
-    (sum, current) =>
-        current.group === GGroup.SJC && current.type == GType.Bar
-            ? (sum += current.quantity)
-            : sum,
-    0
-);
-
-const sumSjsRingQuantity = historicalData.data.reduce(
-    (sum, current) =>
-        current.group === GGroup.SJC && current.type == GType.Ring
-            ? (sum += current.quantity)
-            : sum,
-    0
-);
-
-const sumDojiQuantity = historicalData.data.reduce(
-    (sum, current) =>
-        current.group === GGroup.DOJI && current.type == GType.Ring
-            ? (sum += current.quantity)
-            : sum,
-    0
-);
-
-const sumPnjQuantity = historicalData.data.reduce(
-    (sum, current) =>
-        current.group === GGroup.PNJ && current.type == GType.Ring
-            ? (sum += current.quantity)
-            : sum,
-    0
-);
+import ParallaxScrollView from '@/components/ParallaxScrollView'
+import { ThemedText } from '@/components/ThemedText'
+import { IconSymbol } from '@/components/ui/IconSymbol'
+import { RootState } from '@/store'
+import commonStyles, { parallaxIconSize } from '@/styles'
+import React from 'react'
+import { StyleSheet, View } from 'react-native'
+import { useSelector } from 'react-redux'
+import { GGroup } from '@/types'
+import Table from '@/components/Table'
+import { formatNumber, formatPrice } from '@/utils/numberFormat'
+import historyData from '@/utils/historyData'
 
 const GPrice = () => {
-    const pageData = useSelector((state: RootState) => state.appData);
+    const pageData = useSelector((state: RootState) => state.appData)
 
-    const sjcBarBuy =
-        pageData?.prices?.find(
-            (i) => i.group === GGroup.SJC && i.type === GType.Bar
-        )?.buy || 0;
+    const prices = pageData?.prices?.reduce((d: any, current) => {
+        if (current.group === GGroup.SJC) {
+            d.sjcBuy = current.buy
+        }
+        if (current.group === GGroup.SJC_R) {
+            d.sjcRBuy = current.buy
+        }
+        if (current.group === GGroup.DOJI) {
+            d.dojiBuy = current.buy
+        }
+        if (current.group === GGroup.PNJ) {
+            d.pnjBuy = current.buy
+        }
+        return d
+    }, {})
 
-    const sjcRingBuy =
-        pageData?.prices?.find(
-            (i) => i.group === GGroup.SJC && i.type === GType.Ring
-        )?.buy || 0;
+    const { sjcBuy, sjcRBuy, dojiBuy, pnjBuy } = prices
 
-    const dojiBuy =
-        pageData?.prices?.find((i) => i.group === GGroup.DOJI)?.buy || 0;
+    const { historyTable, sumHistoryTable, summary } = historyData
 
-    const pnjBuy =
-        pageData?.prices?.find((i) => i.group === GGroup.PNJ)?.buy || 0;
+    const presentSjcValue = summary.quantity.sjc * sjcBuy
+    const resentSjcRValue = summary.quantity.sjcR * sjcRBuy
+    const presentPnjValue = summary.quantity.pnj * pnjBuy
+    const presentDojiValue = summary.quantity.doji * dojiBuy
+    const sumPresentBuy =
+        presentSjcValue + resentSjcRValue + presentPnjValue + presentDojiValue
 
     const presentTable = [
         {
-            group: `${GGroup.SJC} ${GType.Bar}`,
-            buy: formatPrice(sjcBarBuy),
-            quantity: sumSjsBarQuantity,
-            value: formatPrice(sjcBarBuy * sumSjsBarQuantity)
+            group: GGroup.SJC,
+            buy: formatPrice(sjcBuy),
+            quantity: summary.quantity.sjc,
+            value: formatPrice(presentSjcValue)
         },
         {
-            group: `${GGroup.SJC} ${GType.Ring}`,
-            buy: formatPrice(sjcRingBuy),
-            quantity: sumSjsRingQuantity,
-            value: formatPrice(sjcRingBuy * sumSjsRingQuantity)
+            group: GGroup.SJC_R,
+            buy: formatPrice(sjcRBuy),
+            quantity: summary.quantity.sjcR,
+            value: formatPrice(resentSjcRValue)
         },
         {
             group: `${GGroup.PNJ}`,
             buy: formatPrice(pnjBuy),
-            quantity: sumPnjQuantity,
-            value: formatPrice(pnjBuy * sumPnjQuantity)
+            quantity: summary.quantity.pnj,
+            value: formatPrice(presentPnjValue)
         },
         {
             group: `${GGroup.DOJI}`,
             buy: formatPrice(dojiBuy),
-            quantity: sumDojiQuantity,
-            value: formatPrice(dojiBuy * sumDojiQuantity)
+            quantity: summary.quantity.doji,
+            value: formatPrice(presentDojiValue)
         }
-    ];
+    ]
+
+    const presentExcludedValue = summary.quantity.excluded * sjcBuy
+
+    const sumPresentTable = [
+        {
+            title: 'Net',
+            quantity: summary.quantity.total - summary.quantity.excluded,
+            value: formatPrice(sumPresentBuy - presentExcludedValue)
+        },
+        {
+            title: 'Exclude',
+            quantity: summary.quantity.excluded,
+            value: formatPrice(presentExcludedValue)
+        },
+        {
+            title: 'Gross',
+            quantity: summary.quantity.total,
+            value: formatPrice(sumPresentBuy)
+        }
+    ]
+
+    const excludedProfitValue =
+        presentExcludedValue / 1000000 - summary.buy.excluded
+    const grossProfitValue = sumPresentBuy / 1000000 - summary.buy.history
+
+    console.log(555555, sumPresentBuy, summary.buy.history)
+
+    const profitTable = [
+        {
+            title: 'Net',
+            value: formatNumber(grossProfitValue - excludedProfitValue)
+        },
+        {
+            title: 'Exclude',
+            value: excludedProfitValue
+        },
+        {
+            title: 'Gross',
+            value: formatNumber(grossProfitValue)
+        }
+    ]
 
     return (
         <ParallaxScrollView
@@ -146,14 +121,35 @@ const GPrice = () => {
                 />
             }
         >
-            <Table data={presentTable} columnCellStyle={[
+            <Table
+                data={profitTable}
+                noHeaderRow
+                columnCellStyle={[
+                    { textAlign: 'left' },
+                    { textAlign: 'right' }
+                ]}
+            />
+            <Table
+                data={sumPresentTable}
+                noHeaderRow
+                noLines
+                columnCellStyle={[
+                    { textAlign: 'left' },
+                    { textAlign: 'right' },
+                    { textAlign: 'right' }
+                ]}
+            />
+            <Table
+                data={presentTable}
+                columnCellStyle={[
                     { textAlign: 'left' },
                     { textAlign: 'right' },
                     { textAlign: 'right' },
                     { textAlign: 'right' }
-                ]} />
+                ]}
+            />
             <Table
-                data={historySumTable}
+                data={sumHistoryTable}
                 noHeaderRow
                 noLines
                 columnCellStyle={[
@@ -174,16 +170,16 @@ const GPrice = () => {
                 ]}
             />
         </ParallaxScrollView>
-    );
-};
+    )
+}
 
 const styles = StyleSheet.create({
-    tableContainer: {},
-    priceContainer: {
+    flexContainer: {
         flex: 1,
         flexDirection: 'row',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        paddingHorizontal: 6
     }
-});
+})
 
-export default GPrice;
+export default GPrice

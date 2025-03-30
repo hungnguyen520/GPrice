@@ -1,17 +1,11 @@
 export const enum GGroup {
     SJC = 'SJC',
+    SJC_R = 'SJC_R',
     DOJI = 'DOJI',
     PNJ = 'PNJ'
 }
-
-export const enum GType {
-    Bar = 'Bar',
-    Ring = 'Ring'
-}
-
 export interface IPriceData extends Record<string, any> {
     group: GGroup
-    type: GType
     buy: number
     sell: number
     formatted?: {
@@ -21,39 +15,68 @@ export interface IPriceData extends Record<string, any> {
 }
 
 export interface IGlobalPrice {
-    ounceUSD: number,
-    taelUSD: number,
-    taelVND: number,
-    rates: IExchangeRate[],
+    ounceUSD: number
+    taelUSD: number
+    taelVND: number
+    rates: IExchangeRate[]
     formatted?: {
-        ounceUSD: string,
-        taelUSD: string,
-        taelVND: string,
-        usdRate: string,
+        ounceUSD: string
+        taelUSD: string
+        taelVND: string
+        usdRate: string
     }
 }
 
 export interface IExchangeRate {
-    code: 'AUD' | 'EUR' | 'YEN' | 'USD',
+    code: 'AUD' | 'EUR' | 'YEN' | 'USD'
     value: number
 }
 
 export interface HistoricalRecord {
     group: GGroup
-    type: GType
     buy: number
     quantity: number
     date: string
 }
 
 export interface HistoricalData {
-    data: HistoricalRecord[],
-    exclude: {
-        quantity: number,
+    data: HistoricalRecord[]
+    excluded: {
+        quantity: number
         value: number
     }
 }
 export interface IPageState {
-    prices?: IPriceData[];
-    globalPrice?: IGlobalPrice;
+    prices?: IPriceData[]
+    globalPrice?: IGlobalPrice
+}
+
+export interface HistoricalViewModel {
+    historyTable: {
+        group: GGroup
+        buy: number
+        quantity: number
+        value: string
+        date: string
+    }[]
+    sumHistoryTable: {
+        title: string
+        quantity: number
+        buy: string
+    }[]
+    summary: {
+        quantity: {
+            total: number
+            sjc: number
+            sjcR: number
+            pnj: number
+            doji: number
+            excluded: number
+        }
+        buy: {
+            average: number
+            excluded: number
+            history: number
+        }
+    }
 }

@@ -1,83 +1,78 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Text, ActivityIndicator, StyleSheet, View } from 'react-native';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import Table from '@/components/Table';
-import {
-    getGlobalPrice,
-    getGlobalPriceURI,
-    getGPrices
-} from '@/utils/apiFetch';
-import { IPageState } from '@/types';
-import { WebView } from 'react-native-webview';
-import commonStyles, { parallaxIconSize } from '@/styles';
-import CustomButton from '@/components/CustomButton';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { ThemedText } from '@/components/ThemedText';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '@/store';
-import { setAppData } from '@/store/appDataSlice';
+import React, { useCallback, useEffect, useState } from 'react'
+import { Text, ActivityIndicator, StyleSheet, View } from 'react-native'
+import ParallaxScrollView from '@/components/ParallaxScrollView'
+import { IconSymbol } from '@/components/ui/IconSymbol'
+import Table from '@/components/Table'
+import { getGlobalPrice, getGlobalPriceURI, getGPrices } from '@/utils/apiFetch'
+import { IPageState } from '@/types'
+import { WebView } from 'react-native-webview'
+import commonStyles, { parallaxIconSize } from '@/styles'
+import CustomButton from '@/components/CustomButton'
+import { useColorScheme } from '@/hooks/useColorScheme'
+import { ThemedText } from '@/components/ThemedText'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from '@/store'
+import { setAppData } from '@/store/appDataSlice'
 
 const getPageData = async () => {
-    const data: IPageState = {};
-    const errors: string[] = [];
+    const data: IPageState = {}
+    const errors: string[] = []
     const [vnRes, gloRes] = await Promise.allSettled([
         getGPrices(),
         getGlobalPrice()
-    ]);
+    ])
 
     if (vnRes.status === 'fulfilled') {
         data.prices = vnRes.value
     } else {
-        errors.push(vnRes.reason.toString());
+        errors.push(vnRes.reason.toString())
     }
 
     if (gloRes.status === 'fulfilled') {
-        data.globalPrice = gloRes.value;
+        data.globalPrice = gloRes.value
     } else {
-        errors.push(gloRes.reason.toString());
+        errors.push(gloRes.reason.toString())
     }
 
     return {
         data,
         errors
-    };
-};
+    }
+}
 
 const Home = () => {
-    const [loading, setLoading] = useState(true);
-    const [errors, setErrors] = useState<string[]>([]);
-    const theme = useColorScheme() ?? 'dark';
+    const [loading, setLoading] = useState(true)
+    const [errors, setErrors] = useState<string[]>([])
+    const theme = useColorScheme() ?? 'dark'
     const pageData = useSelector((state: RootState) => state.appData)
     const dispatch = useDispatch()
 
     const refreshPage = useCallback(async (callback?: Function) => {
-        setLoading(true);
-        const { data, errors } = await getPageData();
-        if(data) {
+        setLoading(true)
+        const { data, errors } = await getPageData()
+        if (data) {
             dispatch(setAppData(data))
         }
-        if(errors?.length) {
-            setErrors(errors);
+        if (errors?.length) {
+            setErrors(errors)
         }
-        setLoading(false);
-        callback?.();
-    }, []);
-    
-    const encodedUrl = getGlobalPriceURI(theme);
+        setLoading(false)
+        callback?.()
+    }, [])
 
-    const tableData = pageData?.prices?.map(d => ({
+    const encodedUrl = getGlobalPriceURI(theme)
+
+    const tableData = pageData?.prices?.map((d) => ({
         group: d.group,
-        type: d.type,
         buy: d.formatted?.buy,
         sell: d.formatted?.sell
-    }));
+    }))
 
     const globalPrice = pageData?.globalPrice
 
     useEffect(() => {
-        refreshPage();
-    }, []);
+        refreshPage()
+    }, [])
 
     return (
         <ParallaxScrollView
@@ -136,7 +131,14 @@ const Home = () => {
                     )}
                     {tableData?.length && (
                         <View style={styles.tableContainer}>
-                            <Table data={tableData} />
+                            <Table
+                                data={tableData}
+                                columnCellStyle={[
+                                    { textAlign: 'left' },
+                                    { textAlign: 'right' },
+                                    { textAlign: 'right' }
+                                ]}
+                            />
                         </View>
                     )}
                     <CustomButton
@@ -149,12 +151,12 @@ const Home = () => {
                 </>
             )}
         </ParallaxScrollView>
-    );
-};
+    )
+}
 
 const styles = StyleSheet.create({
     tableContainer: {
-        paddingBottom: 16
+        paddingBottom: 8
     },
     webview: {
         flex: 1,
@@ -166,6 +168,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between'
     }
-});
+})
 
-export default Home;
+export default Home
