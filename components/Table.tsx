@@ -105,7 +105,8 @@ const styles = StyleSheet.create({
         paddingVertical: 8
     },
     headerCell: {
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        textTransform: 'capitalize'
     },
     cell: {
         flex: 1,

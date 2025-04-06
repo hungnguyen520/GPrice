@@ -1,95 +1,127 @@
-import type { PropsWithChildren, ReactElement } from 'react';
-import { RefreshControl, StyleSheet } from 'react-native';
+import React from 'react'
+import type { PropsWithChildren, ReactElement } from 'react'
+import {
+    RefreshControl,
+    StyleSheet,
+    Image,
+    View,
+    ImageSourcePropType
+} from 'react-native'
 import Animated, {
     interpolate,
     useAnimatedRef,
     useAnimatedStyle,
     useScrollViewOffset
-} from 'react-native-reanimated';
+} from 'react-native-reanimated'
 
-import { ThemedView } from '@/components/ThemedView';
-import { useBottomTabOverflow } from '@/components/ui/TabBarBackground';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import React from 'react';
+import { ThemedView } from '@/components/ThemedView'
+import { useBottomTabOverflow } from '@/components/ui/TabBarBackground'
+import { useColorScheme } from '@/hooks/useColorScheme'
+import { BlurView } from '@react-native-community/blur'
 
-const HEADER_HEIGHT = 180;
+const HEADER_HEIGHT = 180
 
 type Props = PropsWithChildren<{
-    headerImage: ReactElement;
-    headerBackgroundColor: { dark: string; light: string };
-    onRefresh?: (callback: Function) => void;
-}>;
+    headerBackgroundColor: { dark: string; light: string }
+    headerImage?: ReactElement
+    onRefresh?: (callback: Function) => void
+    headerHeight?: number
+    backgroundImage?: ImageSourcePropType
+}>
 
 export default function ParallaxScrollView({
     children,
     headerImage,
     headerBackgroundColor,
-    onRefresh
+    onRefresh,
+    headerHeight = HEADER_HEIGHT,
+    backgroundImage
 }: Props) {
-    const colorScheme = useColorScheme() ?? 'light';
-    const scrollRef = useAnimatedRef<Animated.ScrollView>();
-    const scrollOffset = useScrollViewOffset(scrollRef);
-    const bottom = useBottomTabOverflow();
+    const colorScheme = useColorScheme() ?? 'light'
+    const scrollRef = useAnimatedRef<Animated.ScrollView>()
+    const scrollOffset = useScrollViewOffset(scrollRef)
+    const bottom = useBottomTabOverflow()
     const headerAnimatedStyle = useAnimatedStyle(() => {
         return {
             transform: [
                 {
                     translateY: interpolate(
                         scrollOffset.value,
-                        [-HEADER_HEIGHT, 0, HEADER_HEIGHT],
-                        [-HEADER_HEIGHT / 2, 0, HEADER_HEIGHT * 0.75]
+                        [-headerHeight, 0, headerHeight],
+                        [-headerHeight / 2, 0, headerHeight * 0.75]
                     )
                 },
                 {
                     scale: interpolate(
                         scrollOffset.value,
-                        [-HEADER_HEIGHT, 0, HEADER_HEIGHT],
+                        [-headerHeight, 0, headerHeight],
                         [2, 1, 1]
                     )
                 }
             ]
-        };
-    });
-    const [refreshing, setRefreshing] = React.useState(false);
+        }
+    })
+    const [refreshing, setRefreshing] = React.useState(false)
 
     const _onRefresh = React.useCallback(() => {
         if (onRefresh) {
-            setRefreshing(true);
-            const callback = () => setRefreshing(false);
-            onRefresh(callback);
+            setRefreshing(true)
+            const callback = () => setRefreshing(false)
+            onRefresh(callback)
         }
         // setTimeout(() => {
         //     setRefreshing(false);
         // }, 3000);
-    }, []);
+    }, [])
+
+    const _backgroundImage =
+        backgroundImage ?? require('@/assets/images/hd-city-home-tab.jpg')
 
     return (
         <ThemedView style={styles.container}>
+            <Image
+                key={'blurryImage'}
+                source={_backgroundImage}
+                resizeMode="cover"
+                style={styles.absolute}
+            />
+            <BlurView
+                style={styles.absolute}
+                blurType="dark"
+                blurAmount={2}
+                reducedTransparencyFallbackColor="white"
+            />
             <Animated.ScrollView
                 ref={scrollRef}
                 scrollEventThrottle={16}
                 scrollIndicatorInsets={{ bottom }}
                 contentContainerStyle={{ paddingBottom: bottom }}
+                horizontal={false}
                 refreshControl={
-                    <RefreshControl
-                        refreshing={false}
-                        onRefresh={_onRefresh}
-                    />
+                    <RefreshControl refreshing={false} onRefresh={_onRefresh} />
                 }
             >
-                <Animated.View
-                    style={[
-                        styles.header,
-                        { backgroundColor: headerBackgroundColor[colorScheme] },
-                        headerAnimatedStyle
-                    ]}
-                >
-                    {headerImage}
-                </Animated.View>
+                {headerImage ? (
+                    <Animated.View
+                        style={[
+                            styles.header,
+                            { height: headerHeight },
+                            {
+                                backgroundColor:
+                                    headerBackgroundColor[colorScheme]
+                            },
+                            headerAnimatedStyle
+                        ]}
+                    >
+                        {headerImage}
+                    </Animated.View>
+                ) : (
+                    <View style={[styles.header, { height: headerHeight }]} />
+                )}
                 <ThemedView style={styles.content}>{children}</ThemedView>
             </Animated.ScrollView>
         </ThemedView>
-    );
+    )
 }
 
 const styles = StyleSheet.create({
@@ -97,8 +129,14 @@ const styles = StyleSheet.create({
         flex: 1
     },
     header: {
-        height: HEADER_HEIGHT,
         overflow: 'hidden'
+    },
+    absolute: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%'
     },
     content: {
         flex: 1,
@@ -106,6 +144,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 24,
         paddingBottom: 52,
         gap: 16,
-        overflow: 'hidden'
+        overflow: 'hidden',
+        backgroundColor: 'transparent'
     }
-});
+})
