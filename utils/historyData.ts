@@ -1,7 +1,7 @@
 import { GGroup, HistoricalData, HistoricalViewModel } from '@/types'
 import history from '../assets/history.json'
 import { format, getTime, parse } from 'date-fns'
-import { formatNumber } from './numberFormat'
+import { formatNumber, toNumber } from './numberFormat'
 
 const historicalData = history as HistoricalData
 const historyTable = historicalData.data
@@ -18,10 +18,11 @@ const historyTable = historicalData.data
         date: format(d.date, 'dd/MM/yy')
     }))
 
-const sumQuantity = historicalData.data.reduce(
-    (sum, current) => (sum += current.quantity),
+const _sumQuantity = historicalData.data.reduce(
+    (sum, current) => (sum += current.quantity * 10),
     0
 )
+const sumQuantity = _sumQuantity / 10
 const sumHistoryBuy = historicalData.data.reduce(
     (sum, current) => (sum += current.buy * current.quantity),
     0
@@ -33,7 +34,7 @@ const excluded = historicalData.excluded
 const sumHistoryTable = [
     {
         title: 'Net History',
-        quantity: sumQuantity - excluded.quantity,
+        quantity: formatNumber(sumQuantity - excluded.quantity),
         buy: formatNumber(sumHistoryBuy - excluded.value)
     },
     {

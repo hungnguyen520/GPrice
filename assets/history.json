@@ -95,6 +95,12 @@
             "buy": 90.1,
             "quantity": 0.4,
             "date": "08-Feb-2025"
+        },
+        {
+            "group": "DOJI",
+            "buy": 100.5,
+            "quantity": 0.7,
+            "date": "09-Apr-2025"
         }
     ],
     "excluded": {

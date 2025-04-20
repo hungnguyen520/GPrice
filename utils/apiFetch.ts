@@ -1,11 +1,11 @@
 import axios from 'axios'
-import { GGroup, IExchangeRate, IGlobalPrice, IPriceData } from '@/types'
+import { ExchangeRateVND, GlobalPrice, DomesticPrice } from '@/types'
 import XMLParser from 'react-xml-parser'
 import { FileLogger } from 'react-native-file-logger'
 import { ColorSchemeName } from 'react-native'
-import { formatNumber, formatPrice, toNumber } from './numberFormat'
+import { toNumber } from './numberFormat'
 
-export const fetchSJCPrices = async (): Promise<IPriceData[]> => {
+export const fetchSJCPrice = async () => {
     const goldBarId = 1
     const goldRingId = 49
     const url = 'https://sjc.com.vn/GoldPrice/Services/PriceService.ashx'
@@ -23,40 +23,19 @@ export const fetchSJCPrices = async (): Promise<IPriceData[]> => {
     const bar = d.data.find((i) => i.Id === goldBarId)
     const ring = d.data.find((i) => i.Id === goldRingId)
 
-    return [
-        {
-            group: GGroup.SJC,
+    return {
+        SJC: {
             buy: bar.BuyValue,
-            sell: bar.SellValue,
-            formatted: {
-                buy: formatPrice(bar.BuyValue),
-                sell: formatPrice(bar.SellValue)
-            }
+            sell: bar.SellValue
         },
-        {
-            group: GGroup.SJC_R,
+        SJC_R: {
             buy: ring.BuyValue,
-            sell: ring.SellValue,
-            formatted: {
-                buy: formatPrice(ring.BuyValue),
-                sell: formatPrice(ring.SellValue)
-            }
+            sell: ring.SellValue
         }
-    ]
-}
-
-export const getGlobalPriceURI = (theme: ColorSchemeName = 'dark') => {
-    const url =
-        'https://www.tradingview-widget.com/embed-widget/single-quote/?locale=vi_VN#'
-    const config = {
-        symbol: 'OANDA:XAUUSD',
-        colorTheme: theme,
-        isTransparent: false
     }
-    return encodeURI(url + JSON.stringify(config))
 }
 
-export const getPNJPrices = async (): Promise<IPriceData[]> => {
+export const getPNJPrice = async () => {
     const url =
         'https://edge-api.pnj.io/ecom-frontend/v1/get-gold-price?zone=00'
     const res = await axios.get(url)
@@ -68,20 +47,15 @@ export const getPNJPrices = async (): Promise<IPriceData[]> => {
     const buy = price.giamua * 10000
     const sell = price.giaban * 10000
 
-    return [
-        {
-            group: GGroup.PNJ,
+    return {
+        PNJ: {
             buy,
-            sell,
-            formatted: {
-                buy: formatPrice(buy),
-                sell: formatPrice(sell)
-            }
+            sell
         }
-    ]
+    }
 }
 
-export const getDOJIPrices = async (): Promise<IPriceData[]> => {
+export const getDOJIPrice = async () => {
     const url = 'http://update.giavang.doji.vn/banggia/doji_92411/92411'
 
     const res = await axios.get(url)
@@ -99,22 +73,41 @@ export const getDOJIPrices = async (): Promise<IPriceData[]> => {
     const buy = toIntNumber(price?.attributes?.Buy)
     const sell = toIntNumber(price?.attributes?.Sell)
 
-    return [
-        {
-            group: GGroup.DOJI,
+    return {
+        DOJI: {
             buy,
-            sell,
-            formatted: {
-                buy: formatPrice(buy),
-                sell: formatPrice(sell)
-            }
+            sell
         }
-    ]
+    }
 }
 
-export const getGlobalPrice = async (): Promise<IGlobalPrice | undefined> => {
+export const getExchangeRates = async (): Promise<ExchangeRateVND> => {
+    const url = 'https://sjc.com.vn/GoldPrice/Services/PriceService.ashx'
+    const res = await axios.post(url, 'method=GetExchangeRate')
+    const d = await res.data
+
+    return d.data?.reduce((d, i) => {
+        const code = i.CurrencyCode
+        const value =
+            typeof i.Transfer === 'number' ? i.Transfer : toNumber(i.Transfer)
+        d[code] = value
+        return d
+    }, {})
+}
+
+export const getGlobalPriceURI = (theme: ColorSchemeName = 'dark') => {
+    const url =
+        'https://www.tradingview-widget.com/embed-widget/single-quote/?locale=vi_VN#'
+    const config = {
+        symbol: 'OANDA:XAUUSD',
+        colorTheme: theme,
+        isTransparent: false
+    }
+    return encodeURI(url + JSON.stringify(config))
+}
+
+export const getGlobalPrice = async (): Promise<GlobalPrice | undefined> => {
     // https://www.kitco.com/charts/gold
-    const currency = 'USD'
     const taelPerOunceRate = 1.215276995
     const url = 'https://kdb-gw.prod.kitco.com/'
     const query =
@@ -128,7 +121,7 @@ export const getGlobalPrice = async (): Promise<IGlobalPrice | undefined> => {
         },
         operationName: 'MetalQuote'
     }
-    const [res, rates] = await Promise.all([
+    const [res, exchangeRate] = await Promise.all([
         axios.post(url, body),
         getExchangeRates()
     ])
@@ -137,42 +130,25 @@ export const getGlobalPrice = async (): Promise<IGlobalPrice | undefined> => {
     const priceInOunceUSD =
         typeof globalPrice === 'number' ? globalPrice : toNumber(globalPrice)
     const priceInTaelUSD = priceInOunceUSD * taelPerOunceRate
-
-    const usdRate = rates?.find((i) => i.code === currency)
-    const usdRateValue = usdRate?.value || 0
-    const priceInTaelVND = priceInTaelUSD * usdRateValue
+    const usdRate = exchangeRate?.USD || 0
+    const priceInTaelVND = priceInTaelUSD * usdRate
 
     return {
-        ounceUSD: priceInOunceUSD,
-        taelUSD: priceInTaelUSD,
+        ounce: priceInOunceUSD,
+        tael: priceInTaelUSD,
         taelVND: priceInTaelVND,
-        rates,
-        formatted: {
-            ounceUSD: formatNumber(priceInOunceUSD, 2),
-            taelUSD: formatNumber(priceInTaelUSD, 2),
-            usdRate: formatNumber(usdRateValue),
-            taelVND: formatPrice(priceInTaelVND)
-        }
+        exchangeRateVND: exchangeRate
     }
 }
 
-export const getExchangeRates = async (): Promise<IExchangeRate[]> => {
-    const url = 'https://sjc.com.vn/GoldPrice/Services/PriceService.ashx'
-    const res = await axios.post(url, 'method=GetExchangeRate')
-    const d = await res.data
+export const getDomesticPrice = async (): Promise<DomesticPrice> => {
+    const [sjcPrice, pnjPrice, dojiPrice] = await Promise.all([
+        fetchSJCPrice(),
+        getPNJPrice(),
+        getDOJIPrice()
+    ])
 
-    return d.data?.map((i) => ({
-        code: i.CurrencyCode,
-        value:
-            typeof i.Transfer === 'number' ? i.Transfer : toNumber(i.Transfer)
-    }))
+    return { ...sjcPrice, ...pnjPrice, ...dojiPrice }
 }
 
-export const getGPrices = async (): Promise<IPriceData[]> => {
-    const [sjcPrices = [], pnjPrices = [], dojiPrices = []] = await Promise.all(
-        [fetchSJCPrices(), getPNJPrices(), getDOJIPrices()]
-    )
-    return [...sjcPrices, ...pnjPrices, ...dojiPrices]
-}
-
-export default getGPrices
+export default getDomesticPrice

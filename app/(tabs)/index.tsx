@@ -2,8 +2,12 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { Text, ActivityIndicator, StyleSheet, View } from 'react-native'
 import ParallaxScrollView from '@/components/ParallaxScrollView'
 import Table from '@/components/Table'
-import { getGlobalPrice, getGlobalPriceURI, getGPrices } from '@/utils/apiFetch'
-import { IPageState } from '@/types'
+import {
+    getGlobalPrice,
+    getGlobalPriceURI,
+    getDomesticPrice
+} from '@/utils/apiFetch'
+import { IPageData } from '@/types'
 import { WebView } from 'react-native-webview'
 import commonStyles from '@/styles'
 import CustomButton from '@/components/CustomButton'
@@ -12,17 +16,18 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store'
 import { setAppData } from '@/store/appDataSlice'
 import { ThemedText } from '@/components/ThemedText'
+import { formatNumber, formatPrice } from '@/utils/numberFormat'
 
 const getPageData = async () => {
-    const data: IPageState = {}
+    const data: IPageData = {}
     const errors: string[] = []
     const [vnRes, gloRes] = await Promise.allSettled([
-        getGPrices(),
+        getDomesticPrice(),
         getGlobalPrice()
     ])
 
     if (vnRes.status === 'fulfilled') {
-        data.prices = vnRes.value
+        data.domesticPrice = vnRes.value
     } else {
         errors.push(vnRes.reason.toString())
     }
@@ -65,13 +70,24 @@ const Home = () => {
 
     const encodedUrl = getGlobalPriceURI(theme)
 
-    const tableData = pageData?.prices?.map((d) => ({
-        group: d.group,
-        buy: d.formatted?.buy,
-        sell: d.formatted?.sell
-    }))
+    const domesticTableData = [] as any[]
+    if (pageData?.domesticPrice) {
+        Object.keys(pageData.domesticPrice).forEach((key) => {
+            const price = pageData.domesticPrice?.[key]
+            domesticTableData.push({
+                group: key,
+                buy: formatPrice(price?.buy || 0),
+                sell: formatPrice(price?.sell || 0)
+            })
+        })
+    }
 
-    const globalPrice = pageData?.globalPrice
+    const globalPriceFormatted = {
+        ounce: formatNumber(pageData?.globalPrice?.ounce || 0, 2),
+        tael: formatNumber(pageData?.globalPrice?.tael || 0, 2),
+        usdRate: formatNumber(pageData?.globalPrice?.exchangeRateVND?.USD || 0),
+        taelVND: formatPrice(pageData?.globalPrice?.taelVND || 0)
+    }
 
     useEffect(() => {
         refreshPage()
@@ -96,40 +112,34 @@ const Home = () => {
                         source={{ uri: encodedUrl }}
                         style={styles.webview}
                     />
-                    {globalPrice && (
-                        <View>
-                            <View style={styles.globalPriceItem}>
-                                <TextLarge>Ounce</TextLarge>
-                                <TextLarge>
-                                    {globalPrice.formatted?.ounceUSD}
-                                </TextLarge>
-                            </View>
-                            <View style={styles.globalPriceItem}>
-                                <TextLarge>Tael</TextLarge>
-                                <TextLarge>
-                                    {globalPrice.formatted?.taelUSD}
-                                </TextLarge>
-                            </View>
-                            <View style={styles.globalPriceItem}>
-                                <TextLarge style={{ fontSize: 20 }}>
-                                    Rate USD
-                                </TextLarge>
-                                <TextLarge>
-                                    {globalPrice.formatted?.usdRate}
-                                </TextLarge>
-                            </View>
-                            <View style={styles.globalPriceItem}>
-                                <TextLarge>Tael VND</TextLarge>
-                                <TextLarge>
-                                    {globalPrice.formatted?.taelVND}
-                                </TextLarge>
-                            </View>
+                    <View>
+                        <View style={styles.globalPriceItem}>
+                            <TextLarge>Ounce</TextLarge>
+                            <TextLarge>{globalPriceFormatted.ounce}</TextLarge>
                         </View>
-                    )}
-                    {tableData?.length && (
+                        <View style={styles.globalPriceItem}>
+                            <TextLarge>Tael</TextLarge>
+                            <TextLarge>{globalPriceFormatted.tael}</TextLarge>
+                        </View>
+                        <View style={styles.globalPriceItem}>
+                            <TextLarge style={{ fontSize: 20 }}>
+                                Rate USD
+                            </TextLarge>
+                            <TextLarge>
+                                {globalPriceFormatted.usdRate}
+                            </TextLarge>
+                        </View>
+                        <View style={styles.globalPriceItem}>
+                            <TextLarge>Tael VND</TextLarge>
+                            <TextLarge>
+                                {globalPriceFormatted.taelVND}
+                            </TextLarge>
+                        </View>
+                    </View>
+                    {domesticTableData?.length && (
                         <View style={styles.tableContainer}>
                             <Table
-                                data={tableData}
+                                data={domesticTableData}
                                 columnCellStyle={[
                                     { textAlign: 'left' },
                                     { textAlign: 'right' },

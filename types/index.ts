@@ -4,33 +4,39 @@ export const enum GGroup {
     DOJI = 'DOJI',
     PNJ = 'PNJ'
 }
-export interface IPriceData extends Record<string, any> {
-    group: GGroup
-    buy: number
-    sell: number
-    formatted?: {
-        buy: string
-        sell: string
-    }
+
+export const enum Currency {
+    AUD = 'AUD',
+    EUR = 'EUR',
+    YEN = 'YEN',
+    USD = 'USD'
 }
 
-export interface IGlobalPrice {
-    ounceUSD: number
-    taelUSD: number
+/**
+ * The price unit is in million VND
+ */
+export type DomesticPrice = Record<
+    GGroup,
+    {
+        buy: number
+        sell: number
+    }
+>
+
+/**
+ * The price unit is in USD
+ */
+export type GlobalPrice = {
+    ounce: number
+    tael: number
     taelVND: number
-    rates: IExchangeRate[]
-    formatted?: {
-        ounceUSD: string
-        taelUSD: string
-        taelVND: string
-        usdRate: string
-    }
+    exchangeRateVND: ExchangeRateVND
 }
 
-export interface IExchangeRate {
-    code: 'AUD' | 'EUR' | 'YEN' | 'USD'
-    value: number
-}
+/**
+ * The price unit is thousands VND
+ */
+export type ExchangeRateVND = Record<Currency, number>
 
 export interface HistoricalRecord {
     group: GGroup
@@ -46,9 +52,9 @@ export interface HistoricalData {
         value: number
     }
 }
-export interface IPageState {
-    prices?: IPriceData[]
-    globalPrice?: IGlobalPrice
+export interface IPageData {
+    domesticPrice?: DomesticPrice
+    globalPrice?: GlobalPrice
 }
 
 export interface HistoricalViewModel {

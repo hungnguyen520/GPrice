@@ -11,23 +11,10 @@ import historyData from '@/utils/historyData'
 const GPrice = () => {
     const pageData = useSelector((state: RootState) => state.appData)
 
-    const prices = pageData?.prices?.reduce((d: any, current) => {
-        if (current.group === GGroup.SJC) {
-            d.sjcBuy = current.buy
-        }
-        if (current.group === GGroup.SJC_R) {
-            d.sjcRBuy = current.buy
-        }
-        if (current.group === GGroup.DOJI) {
-            d.dojiBuy = current.buy
-        }
-        if (current.group === GGroup.PNJ) {
-            d.pnjBuy = current.buy
-        }
-        return d
-    }, {})
-
-    const { sjcBuy, sjcRBuy, dojiBuy, pnjBuy } = prices
+    const sjcBuy = pageData.domesticPrice?.SJC?.buy || 0
+    const sjcRBuy = pageData.domesticPrice?.SJC_R?.buy || 0
+    const dojiBuy = pageData.domesticPrice?.DOJI?.buy || 0
+    const pnjBuy = pageData.domesticPrice?.PNJ?.buy || 0
 
     const { historyTable, sumHistoryTable, summary } = historyData
 
@@ -70,7 +57,9 @@ const GPrice = () => {
     const sumPresentTable = [
         {
             title: 'Net',
-            quantity: summary.quantity.total - summary.quantity.excluded,
+            quantity: formatNumber(
+                summary.quantity.total - summary.quantity.excluded
+            ),
             value: formatPrice(sumPresentBuy - presentExcludedValue)
         },
         {
