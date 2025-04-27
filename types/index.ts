@@ -34,7 +34,7 @@ export type GlobalPrice = {
 }
 
 /**
- * The price unit is thousands VND
+ * The price unit is in VND
  */
 export type ExchangeRateVND = Record<Currency, number>
 

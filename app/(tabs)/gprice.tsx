@@ -76,6 +76,7 @@ const GPrice = () => {
 
     const excludedProfitValue =
         presentExcludedValue / 1000000 - summary.buy.excluded
+
     const grossProfitValue = sumPresentBuy / 1000000 - summary.buy.history
 
     const profitTable = [
