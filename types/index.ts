@@ -2,7 +2,8 @@ export const enum GGroup {
     SJC = 'SJC',
     SJC_R = 'SJC_R',
     DOJI = 'DOJI',
-    PNJ = 'PNJ'
+    PNJ = 'PNJ',
+    NM = 'NM'
 }
 
 export const enum Currency {
@@ -77,6 +78,7 @@ export interface HistoricalViewModel {
             sjcR: number
             pnj: number
             doji: number
+            nm: number
             excluded: number
         }
         buy: {

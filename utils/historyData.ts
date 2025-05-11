@@ -1,7 +1,7 @@
 import { GGroup, HistoricalData, HistoricalViewModel } from '@/types'
 import history from '../assets/history.json'
 import { format, getTime, parse } from 'date-fns'
-import { formatNumber, toNumber } from './numberFormat'
+import { formatNumber } from './numberFormat'
 
 const historicalData = history as HistoricalData
 const historyTable = historicalData.data
@@ -78,6 +78,12 @@ const sumPnjQuantity = historicalData.data.reduce(
     0
 )
 
+const sumNmQuantity = historicalData.data.reduce(
+    (sum, current) =>
+        current.group === GGroup.NM ? (sum += current.quantity) : sum,
+    0
+)
+
 export default {
     historyTable,
     sumHistoryTable,
@@ -88,6 +94,7 @@ export default {
             sjcR: sumSjsRingQuantity,
             pnj: sumPnjQuantity,
             doji: sumDojiQuantity,
+            nm: sumNmQuantity,
             excluded: excluded.quantity
         },
         buy: {
