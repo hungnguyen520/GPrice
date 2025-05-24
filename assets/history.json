@@ -107,6 +107,18 @@
             "buy": 110.2,
             "quantity": 0.4,
             "date": "11-May-2025"
+        },
+        {
+            "group": "NM",
+            "buy": 106.2,
+            "quantity": 0.1,
+            "date": "16-May-2025"
+        },
+        {
+            "group": "NM",
+            "buy": 109,
+            "quantity": 0.5,
+            "date": "24-May-2025"
         }
     ],
     "excluded": {
