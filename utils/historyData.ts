@@ -31,25 +31,33 @@ const avgHistoryBuy = sumHistoryBuy / sumQuantity
 
 const excluded = historicalData.excluded
 
-const sumHistoryTable = [
+const gramPerTael = 37.5
+const netQuantity = sumQuantity - excluded.quantity
+
+const historySumTable: HistoricalViewModel['historySumTable'] = [
     {
-        title: 'Net History',
-        quantity: formatNumber(sumQuantity - excluded.quantity),
+        '#': 'Net H',
+        quantity: formatNumber(netQuantity),
+        gram: formatNumber(netQuantity * gramPerTael),
         buy: formatNumber(sumHistoryBuy - excluded.value)
     },
     {
-        title: 'Exclude',
+        '#': 'Exclude H',
         quantity: excluded.quantity,
+        gram: formatNumber(excluded.quantity * gramPerTael),
         buy: excluded.value
     },
     {
-        title: 'Gross History',
+        '#': 'Gross H',
         quantity: sumQuantity,
+        gram: formatNumber(sumQuantity * gramPerTael),
         buy: formatNumber(sumHistoryBuy)
-    },
+    }
+]
+
+const avgBuyTable: HistoricalViewModel['avgBuyTable'] = [
     {
-        title: 'Average Buy',
-        quantity: '',
+        title: 'Avg Buy',
         buy: formatNumber(avgHistoryBuy)
     }
 ]
@@ -86,7 +94,8 @@ const sumNmQuantity = historicalData.data.reduce(
 
 export default {
     historyTable,
-    sumHistoryTable,
+    historySumTable,
+    avgBuyTable,
     summary: {
         quantity: {
             total: sumQuantity,

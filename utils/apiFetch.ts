@@ -149,7 +149,7 @@ export const getDomesticPrice = async (): Promise<DomesticPrice> => {
     ])
 
     const nmSell = dojiPrice.DOJI.sell - 7000000
-    const nmBuy = nmSell - 1000000
+    const nmBuy = nmSell - 1500000
 
     return {
         ...sjcPrice,

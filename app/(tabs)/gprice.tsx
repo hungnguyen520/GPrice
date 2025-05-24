@@ -17,7 +17,7 @@ const GPrice = () => {
     const pnjBuy = pageData.domesticPrice?.PNJ?.buy || 0
     const nmBuy = pageData.domesticPrice?.NM?.buy || 0
 
-    const { historyTable, sumHistoryTable, summary } = historyData
+    const { historyTable, historySumTable, avgBuyTable, summary } = historyData
 
     const presentSjcValue = summary.quantity.sjc * sjcBuy
     const presentSjcRValue = summary.quantity.sjcR * sjcRBuy
@@ -140,11 +140,22 @@ const GPrice = () => {
                 ]}
             />
             <Table
-                data={sumHistoryTable}
-                noHeaderRow
+                data={avgBuyTable}
                 noLines
+                noHeaderRow
+                fontSize={17}
+                columnCellStyle={[
+                    { textAlign: 'right' },
+                    { textAlign: 'left', fontWeight: '700' }
+                ]}
+            />
+            <Table
+                data={historySumTable}
+                noLines
+                fontSize={15}
                 columnCellStyle={[
                     { textAlign: 'left' },
+                    { textAlign: 'right' },
                     { textAlign: 'right' },
                     { textAlign: 'right' }
                 ]}
