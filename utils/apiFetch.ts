@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { ExchangeRateVND, GlobalPrice, DomesticPrice } from '@/types'
 import XMLParser from 'react-xml-parser'
-import { FileLogger } from 'react-native-file-logger'
+// import { FileLogger } from 'react-native-file-logger'
 import { ColorSchemeName } from 'react-native'
 import { toNumber } from './numberFormat'
 

@@ -1,169 +1,106 @@
 import { Image, StyleSheet, Platform } from 'react-native'
-
-import { HelloWave } from '@/components/HelloWave'
 import ParallaxScrollView from '@/components/ParallaxScrollView'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
-import { ExternalLink } from '@/components/ExternalLink'
-import { Collapsible } from '@/components/Collapsible'
+import XMLParser from 'react-xml-parser'
+import axios from 'axios'
+import { FileLogger } from 'react-native-file-logger'
+import { useEffect, useState } from 'react'
+import { stripHtmlTags } from '@/utils/stringFormat'
+import { useSelector } from 'react-redux'
+import { RootState } from '@/store'
+import DropdownModal from '@/components/DropdownModal'
+import { CHANNEL_SELECTION } from '@/constants/lottery.constant'
+
+interface ILotteryDrawTable {
+    day: string
+    date: string
+    code: string
+    price8: number[]
+    price7: number[]
+    price6: number[]
+    price5: number[]
+    price4: number[]
+    price3: number[]
+    price2: number[]
+    price1: number[]
+    priceS: number[]
+}
 
 export default function Sample() {
+    const pageData = useSelector((state: RootState) => state.appData)
+    const [drawableURL, setDrawableURL] = useState<string>()
+
+    const getXSMN = async () => {
+        const url =
+            'https://www.minhngoc.net.vn/ket-qua-xo-so/mien-nam/dong-nai.html'
+
+        const response = await axios.get(url)
+        const data = await response.data
+
+        const xml = new XMLParser().parseFromString(data)
+        const xmlTables: any[] = xml
+            .getElementsByTagName('table')
+            .filter((i) => i.attributes?.class === 'bkqtinhmiennam')
+
+        const dataTables: ILotteryDrawTable[] = []
+
+        xmlTables.forEach((table) => {
+            const dataDivs = table.getElementsByTagName('div')
+            const dataSpans = table.getElementsByTagName('span')
+            const day = dataDivs.find((i) => i.attributes?.class === 'thu')
+            const date = dataDivs.find((i) => i.attributes?.class === 'ngay')
+            const code = dataSpans.find((i) => i.attributes?.class === 'loaive')
+
+            const dataTds = table.getElementsByTagName('td')
+            const priceS = dataTds.find((i) => i.attributes?.class === 'giaidb')
+            const price1 = dataTds.find((i) => i.attributes?.class === 'giai1')
+            const price2 = dataTds.find((i) => i.attributes?.class === 'giai2')
+            const price3 = dataTds.find((i) => i.attributes?.class === 'giai3')
+            const price4 = dataTds.find((i) => i.attributes?.class === 'giai4')
+            const price5 = dataTds.find((i) => i.attributes?.class === 'giai5')
+            const price6 = dataTds.find((i) => i.attributes?.class === 'giai6')
+            const price7 = dataTds.find((i) => i.attributes?.class === 'giai7')
+            const price8 = dataTds.find((i) => i.attributes?.class === 'giai8')
+
+            const dataTable = {
+                day: day?.children[0]?.value,
+                date: stripHtmlTags(date?.value)?.slice(-10),
+                code: code?.value,
+                priceS: priceS?.children?.map((i) => i.value),
+                price1: price1?.children?.map((i) => i.value),
+                price2: price2?.children?.map((i) => i.value),
+                price3: price3?.children?.map((i) => i.value),
+                price4: price4?.children?.map((i) => i.value),
+                price5: price5?.children?.map((i) => i.value),
+                price6: price6?.children?.map((i) => i.value),
+                price7: price7?.children?.map((i) => i.value),
+                price8: price8?.children?.map((i) => i.value)
+            }
+
+            dataTables.push(dataTable)
+
+            FileLogger.debug(JSON.stringify(dataTable))
+        })
+    }
+
+    useEffect(() => {
+        // getXSMN()
+    }, [pageData])
+
     return (
         <ParallaxScrollView
-            headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-            headerImage={
-                <Image
-                    source={require('@/assets/images/partial-react-logo.png')}
-                    style={styles.reactLogo}
-                />
-            }
+            headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+            headerHeight={50}
+            backgroundImage={require('@/assets/images/hd-city-2nd-tab2.jpg')}
         >
             <ThemedView style={styles.titleContainer}>
-                <ThemedText type="title">Welcome!</ThemedText>
-                <HelloWave />
+                <DropdownModal
+                    options={CHANNEL_SELECTION}
+                    onChange={({ value }) => setDrawableURL(value as string)}
+                />
             </ThemedView>
-            <ThemedView style={styles.stepContainer}>
-                <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-                <ThemedText>
-                    Edit{' '}
-                    <ThemedText type="defaultSemiBold">
-                        app/(tabs)/index.tsx
-                    </ThemedText>{' '}
-                    to see changes. Press{' '}
-                    <ThemedText type="defaultSemiBold">
-                        {Platform.select({
-                            ios: 'cmd + d',
-                            android: 'cmd + m',
-                            web: 'F12'
-                        })}
-                    </ThemedText>{' '}
-                    to open developer tools.
-                </ThemedText>
-            </ThemedView>
-            <ThemedView style={styles.stepContainer}>
-                <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-                <ThemedText>
-                    Tap the Explore tab to learn more about what's included in
-                    this starter app.
-                </ThemedText>
-            </ThemedView>
-            <ThemedView style={styles.stepContainer}>
-                <ThemedText type="subtitle">
-                    Step 3: Get a fresh start
-                </ThemedText>
-                <ThemedText>
-                    When you're ready, run{' '}
-                    <ThemedText type="defaultSemiBold">
-                        npm run reset-project
-                    </ThemedText>{' '}
-                    to get a fresh{' '}
-                    <ThemedText type="defaultSemiBold">app</ThemedText>{' '}
-                    directory. This will move the current{' '}
-                    <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-                    <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-                </ThemedText>
-            </ThemedView>
-            <ThemedView style={styles.stepContainer}>
-                <Collapsible title="File-based routing">
-                    <ThemedText>
-                        This app has two screens:{' '}
-                        <ThemedText type="defaultSemiBold">
-                            app/(tabs)/index.tsx
-                        </ThemedText>{' '}
-                        and{' '}
-                        <ThemedText type="defaultSemiBold">
-                            app/(tabs)/explore.tsx
-                        </ThemedText>
-                    </ThemedText>
-                    <ThemedText>
-                        The layout file in{' '}
-                        <ThemedText type="defaultSemiBold">
-                            app/(tabs)/_layout.tsx
-                        </ThemedText>{' '}
-                        sets up the tab navigator.
-                    </ThemedText>
-                    <ExternalLink href="https://docs.expo.dev/router/introduction">
-                        <ThemedText type="link">Learn more</ThemedText>
-                    </ExternalLink>
-                </Collapsible>
-                <Collapsible title="Android, iOS, and web support">
-                    <ThemedText>
-                        You can open this project on Android, iOS, and the web.
-                        To open the web version, press{' '}
-                        <ThemedText type="defaultSemiBold">w</ThemedText> in the
-                        terminal running this project.
-                    </ThemedText>
-                </Collapsible>
-                <Collapsible title="Images">
-                    <ThemedText>
-                        For static images, you can use the{' '}
-                        <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-                        <ThemedText type="defaultSemiBold">@3x</ThemedText>{' '}
-                        suffixes to provide files for different screen densities
-                    </ThemedText>
-                    <Image
-                        source={require('@/assets/images/react-logo.png')}
-                        style={{ alignSelf: 'center' }}
-                    />
-                    <ExternalLink href="https://reactnative.dev/docs/images">
-                        <ThemedText type="link">Learn more</ThemedText>
-                    </ExternalLink>
-                </Collapsible>
-                <Collapsible title="Custom fonts">
-                    <ThemedText>
-                        Open{' '}
-                        <ThemedText type="defaultSemiBold">
-                            app/_layout.tsx
-                        </ThemedText>{' '}
-                        to see how to load{' '}
-                        <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-                            custom fonts such as this one.
-                        </ThemedText>
-                    </ThemedText>
-                    <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-                        <ThemedText type="link">Learn more</ThemedText>
-                    </ExternalLink>
-                </Collapsible>
-                <Collapsible title="Light and dark mode components">
-                    <ThemedText>
-                        This template has light and dark mode support. The{' '}
-                        <ThemedText type="defaultSemiBold">
-                            useColorScheme()
-                        </ThemedText>{' '}
-                        hook lets you inspect what the user's current color
-                        scheme is, and so you can adjust UI colors accordingly.
-                    </ThemedText>
-                    <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-                        <ThemedText type="link">Learn more</ThemedText>
-                    </ExternalLink>
-                </Collapsible>
-                <Collapsible title="Animations">
-                    <ThemedText>
-                        This template includes an example of an animated
-                        component. The{' '}
-                        <ThemedText type="defaultSemiBold">
-                            components/HelloWave.tsx
-                        </ThemedText>{' '}
-                        component uses the powerful{' '}
-                        <ThemedText type="defaultSemiBold">
-                            react-native-reanimated
-                        </ThemedText>{' '}
-                        library to create a waving hand animation.
-                    </ThemedText>
-                    {Platform.select({
-                        ios: (
-                            <ThemedText>
-                                The{' '}
-                                <ThemedText type="defaultSemiBold">
-                                    components/ParallaxScrollView.tsx
-                                </ThemedText>{' '}
-                                component provides a parallax effect for the
-                                header image.
-                            </ThemedText>
-                        )
-                    })}
-                </Collapsible>
-            </ThemedView>
+            <ThemedText>{drawableURL}</ThemedText>
         </ParallaxScrollView>
     )
 }

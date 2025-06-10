@@ -14,22 +14,19 @@ const GPrice = () => {
     const sjcBuy = pageData.domesticPrice?.SJC?.buy || 0
     const sjcRBuy = pageData.domesticPrice?.SJC_R?.buy || 0
     const dojiBuy = pageData.domesticPrice?.DOJI?.buy || 0
-    const pnjBuy = pageData.domesticPrice?.PNJ?.buy || 0
-    const nmBuy = pageData.domesticPrice?.NM?.buy || 0
+    // const pnjBuy = pageData.domesticPrice?.PNJ?.buy || 0
+    // const nmBuy = pageData.domesticPrice?.NM?.buy || 0
 
     const { historyTable, historySumTable, avgBuyTable, summary } = historyData
 
     const presentSjcValue = summary.quantity.sjc * sjcBuy
     const presentSjcRValue = summary.quantity.sjcR * sjcRBuy
-    const presentPnjValue = summary.quantity.pnj * pnjBuy
     const presentDojiValue = summary.quantity.doji * dojiBuy
-    const presentNmValue = summary.quantity.nm * nmBuy
-    const sumPresentBuy =
-        presentSjcValue +
-        presentSjcRValue +
-        presentPnjValue +
-        presentDojiValue +
-        presentNmValue
+    // const presentPnjValue = summary.quantity.pnj * pnjBuy
+    // const presentNmValue = summary.quantity.nm * nmBuy
+    const sumPresentBuy = presentSjcValue + presentSjcRValue + presentDojiValue
+    // presentPnjValue +
+    // presentNmValue
 
     const presentTable = [
         {
@@ -44,24 +41,24 @@ const GPrice = () => {
             quantity: summary.quantity.sjcR,
             value: formatPrice(presentSjcRValue)
         },
-        {
-            group: `${GGroup.PNJ}`,
-            buy: formatPrice(pnjBuy),
-            quantity: summary.quantity.pnj,
-            value: formatPrice(presentPnjValue)
-        },
+        // {
+        //     group: `${GGroup.PNJ}`,
+        //     buy: formatPrice(pnjBuy),
+        //     quantity: summary.quantity.pnj,
+        //     value: formatPrice(presentPnjValue)
+        // },
         {
             group: `${GGroup.DOJI}`,
             buy: formatPrice(dojiBuy),
             quantity: summary.quantity.doji,
             value: formatPrice(presentDojiValue)
-        },
-        {
-            group: `${GGroup.NM}`,
-            buy: formatPrice(nmBuy),
-            quantity: summary.quantity.nm,
-            value: formatPrice(presentNmValue)
         }
+        // {
+        //     group: `${GGroup.NM}`,
+        //     buy: formatPrice(nmBuy),
+        //     quantity: summary.quantity.nm,
+        //     value: formatPrice(presentNmValue)
+        // }
     ]
 
     const presentExcludedValue = summary.quantity.excluded * sjcBuy

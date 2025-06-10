@@ -69,7 +69,6 @@ export interface HistoricalViewModel {
     historySumTable: {
         '#': string
         quantity: string | number
-        gram: string
         buy: string | number
     }[]
     avgBuyTable: {

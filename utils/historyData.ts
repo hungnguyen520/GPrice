@@ -31,26 +31,22 @@ const avgHistoryBuy = sumHistoryBuy / sumQuantity
 
 const excluded = historicalData.excluded
 
-const gramPerTael = 37.5
 const netQuantity = sumQuantity - excluded.quantity
 
 const historySumTable: HistoricalViewModel['historySumTable'] = [
     {
         '#': 'Net H',
         quantity: formatNumber(netQuantity),
-        gram: formatNumber(netQuantity * gramPerTael),
         buy: formatNumber(sumHistoryBuy - excluded.value)
     },
     {
         '#': 'Exclude H',
         quantity: excluded.quantity,
-        gram: formatNumber(excluded.quantity * gramPerTael),
         buy: excluded.value
     },
     {
         '#': 'Gross H',
         quantity: sumQuantity,
-        gram: formatNumber(sumQuantity * gramPerTael),
         buy: formatNumber(sumHistoryBuy)
     }
 ]

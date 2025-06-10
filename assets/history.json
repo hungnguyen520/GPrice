@@ -3,50 +3,8 @@
         {
             "group": "SJC_R",
             "buy": 65.5,
-            "quantity": 6.5,
+            "quantity": 5,
             "date": "01-Mar-2024"
-        },
-        {
-            "group": "SJC_R",
-            "buy": 66.5,
-            "quantity": 0.5,
-            "date": "02-Mar-2024"
-        },
-        {
-            "group": "SJC_R",
-            "buy": 69.3,
-            "quantity": 1,
-            "date": "09-Mar-2024"
-        },
-        {
-            "group": "SJC_R",
-            "buy": 69.6,
-            "quantity": 0.5,
-            "date": "09-Mar-2024"
-        },
-        {
-            "group": "SJC_R",
-            "buy": 76.2,
-            "quantity": 0.5,
-            "date": "13-Apr-2024"
-        },
-        {
-            "group": "SJC_R",
-            "buy": 74.8,
-            "quantity": 0.6,
-            "date": "04-May-2024"
-        },
-        {
-            "group": "SJC_R",
-            "buy": 90.6,
-            "quantity": 0.4,
-            "date": "10-Feb-2025"
-        },
-        {
-            "group": "SJC",
-            "buy": 78,
-            "quantity": 1,
-            "date": "30-Aug-2024"
         },
         {
             "group": "SJC",
@@ -64,7 +22,7 @@
             "group": "SJC",
             "buy": 85.3,
             "quantity": 1,
-            "date": "27-Nov-2024"
+            "date": "29-Nov-2024"
         },
         {
             "group": "DOJI",
@@ -89,36 +47,6 @@
             "buy": 90.3,
             "quantity": 1,
             "date": "16-Feb-2025"
-        },
-        {
-            "group": "PNJ",
-            "buy": 90.1,
-            "quantity": 0.4,
-            "date": "08-Feb-2025"
-        },
-        {
-            "group": "DOJI",
-            "buy": 100.5,
-            "quantity": 0.7,
-            "date": "09-Apr-2025"
-        },
-        {
-            "group": "NM",
-            "buy": 110.2,
-            "quantity": 0.4,
-            "date": "11-May-2025"
-        },
-        {
-            "group": "NM",
-            "buy": 106.2,
-            "quantity": 0.1,
-            "date": "16-May-2025"
-        },
-        {
-            "group": "NM",
-            "buy": 109,
-            "quantity": 0.5,
-            "date": "24-May-2025"
         }
     ],
     "excluded": {
