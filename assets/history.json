@@ -24,9 +24,5 @@
             "quantity": 1,
             "date": "16-Feb-2025"
         }
-    ],
-    "excluded": {
-        "quantity": 1.7,
-        "value": 116.5
-    }
+    ]
 }

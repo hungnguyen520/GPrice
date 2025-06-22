@@ -27,36 +27,7 @@ const sumHistoryBuy = historicalData.data.reduce(
     (sum, current) => (sum += current.buy * current.quantity),
     0
 )
-const avgHistoryBuy = sumHistoryBuy / sumQuantity
-
-const excluded = historicalData.excluded
-
-const netQuantity = sumQuantity - excluded.quantity
-
-const historySumTable: HistoricalViewModel['historySumTable'] = [
-    {
-        '#': 'Net H',
-        quantity: formatNumber(netQuantity),
-        buy: formatNumber(sumHistoryBuy - excluded.value)
-    },
-    {
-        '#': 'Exclude H',
-        quantity: excluded.quantity,
-        buy: excluded.value
-    },
-    {
-        '#': 'Gross H',
-        quantity: sumQuantity,
-        buy: formatNumber(sumHistoryBuy)
-    }
-]
-
-const avgBuyTable: HistoricalViewModel['avgBuyTable'] = [
-    {
-        title: 'Avg Buy',
-        buy: formatNumber(avgHistoryBuy)
-    }
-]
+const avgBuy = sumHistoryBuy / sumQuantity
 
 // const sumSjsBarQuantity = historicalData.data.reduce(
 //     (sum, current) =>
@@ -64,7 +35,7 @@ const avgBuyTable: HistoricalViewModel['avgBuyTable'] = [
 //     0
 // )
 
-const sumSjsRingQuantity = historicalData.data.reduce(
+const sumSjsRQuantity = historicalData.data.reduce(
     (sum, current) =>
         current.group === GGroup.SJC_R ? (sum += current.quantity) : sum,
     0
@@ -90,22 +61,17 @@ const sumDojiQuantity = historicalData.data.reduce(
 
 export default {
     historyTable,
-    historySumTable,
-    avgBuyTable,
-    summary: {
-        quantity: {
-            total: sumQuantity,
-            // sjc: sumSjsBarQuantity,
-            sjcR: sumSjsRingQuantity,
-            // pnj: sumPnjQuantity,
-            doji: sumDojiQuantity,
-            // nm: sumNmQuantity,
-            excluded: excluded.quantity
-        },
-        buy: {
-            average: avgHistoryBuy,
-            excluded: excluded.value,
-            history: sumHistoryBuy
-        }
+    historySum: {
+        quantity: sumQuantity,
+        value: sumHistoryBuy
+    },
+    avgBuy,
+    quantity: {
+        total: sumQuantity,
+        sjcR: sumSjsRQuantity,
+        doji: sumDojiQuantity
+        // sjc: sumSjsBarQuantity,
+        // pnj: sumPnjQuantity,
+        // nm: sumNmQuantity,
     }
 } as HistoricalViewModel
