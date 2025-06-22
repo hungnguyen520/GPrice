@@ -3,26 +3,8 @@
         {
             "group": "SJC_R",
             "buy": 65.5,
-            "quantity": 5,
+            "quantity": 4.5,
             "date": "01-Mar-2024"
-        },
-        {
-            "group": "SJC",
-            "buy": 81,
-            "quantity": 1,
-            "date": "18-Sep-2024"
-        },
-        {
-            "group": "SJC",
-            "buy": 80.5,
-            "quantity": 1,
-            "date": "09-Oct-2024"
-        },
-        {
-            "group": "SJC",
-            "buy": 85.3,
-            "quantity": 1,
-            "date": "29-Nov-2024"
         },
         {
             "group": "DOJI",
@@ -35,12 +17,6 @@
             "buy": 91.4,
             "quantity": 6.3,
             "date": "11-Feb-2025"
-        },
-        {
-            "group": "DOJI",
-            "buy": 90.7,
-            "quantity": 2,
-            "date": "13-Feb-2025"
         },
         {
             "group": "DOJI",

@@ -58,11 +58,11 @@ const avgBuyTable: HistoricalViewModel['avgBuyTable'] = [
     }
 ]
 
-const sumSjsBarQuantity = historicalData.data.reduce(
-    (sum, current) =>
-        current.group === GGroup.SJC ? (sum += current.quantity) : sum,
-    0
-)
+// const sumSjsBarQuantity = historicalData.data.reduce(
+//     (sum, current) =>
+//         current.group === GGroup.SJC ? (sum += current.quantity) : sum,
+//     0
+// )
 
 const sumSjsRingQuantity = historicalData.data.reduce(
     (sum, current) =>
@@ -76,17 +76,17 @@ const sumDojiQuantity = historicalData.data.reduce(
     0
 )
 
-const sumPnjQuantity = historicalData.data.reduce(
-    (sum, current) =>
-        current.group === GGroup.PNJ ? (sum += current.quantity) : sum,
-    0
-)
+// const sumPnjQuantity = historicalData.data.reduce(
+//     (sum, current) =>
+//         current.group === GGroup.PNJ ? (sum += current.quantity) : sum,
+//     0
+// )
 
-const sumNmQuantity = historicalData.data.reduce(
-    (sum, current) =>
-        current.group === GGroup.NM ? (sum += current.quantity) : sum,
-    0
-)
+// const sumNmQuantity = historicalData.data.reduce(
+//     (sum, current) =>
+//         current.group === GGroup.NM ? (sum += current.quantity) : sum,
+//     0
+// )
 
 export default {
     historyTable,
@@ -95,11 +95,11 @@ export default {
     summary: {
         quantity: {
             total: sumQuantity,
-            sjc: sumSjsBarQuantity,
+            // sjc: sumSjsBarQuantity,
             sjcR: sumSjsRingQuantity,
-            pnj: sumPnjQuantity,
+            // pnj: sumPnjQuantity,
             doji: sumDojiQuantity,
-            nm: sumNmQuantity,
+            // nm: sumNmQuantity,
             excluded: excluded.quantity
         },
         buy: {

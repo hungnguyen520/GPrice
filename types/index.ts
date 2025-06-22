@@ -16,12 +16,14 @@ export const enum Currency {
 /**
  * The price unit is in million VND
  */
-export type DomesticPrice = Record<
-    GGroup,
-    {
-        buy: number
-        sell: number
-    }
+export type DomesticPrice = Partial<
+    Record<
+        GGroup,
+        {
+            buy: number
+            sell: number
+        }
+    >
 >
 
 /**
@@ -37,7 +39,7 @@ export type GlobalPrice = {
 /**
  * The price unit is in VND
  */
-export type ExchangeRateVND = Record<Currency, number>
+export type ExchangeRateVND = Partial<Record<Currency, number>>
 
 export interface HistoricalRecord {
     group: GGroup

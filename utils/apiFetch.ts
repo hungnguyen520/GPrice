@@ -81,18 +81,23 @@ export const getDOJIPrice = async () => {
     }
 }
 
-export const getExchangeRates = async (): Promise<ExchangeRateVND> => {
-    const url = 'https://sjc.com.vn/GoldPrice/Services/PriceService.ashx'
-    const res = await axios.post(url, 'method=GetExchangeRate')
+export const getExchangeRateVND = async (): Promise<ExchangeRateVND> => {
+    const url =
+        'https://portal.vietcombank.com.vn/Usercontrols/TVPortal.TyGia/pXML.aspx?b=10'
+    const res = await axios.get(url)
     const d = await res.data
 
-    return d.data?.reduce((d, i) => {
-        const code = i.CurrencyCode
-        const value =
-            typeof i.Transfer === 'number' ? i.Transfer : toNumber(i.Transfer)
-        d[code] = value
-        return d
-    }, {})
+    const xml = new XMLParser().parseFromString(d)
+    const usdPrice = xml
+        .getElementsByTagName('Exrate')
+        .find((i) => i.attributes?.CurrencyCode === 'USD')
+
+    const usdRateStr = usdPrice?.attributes?.Transfer || 0
+    const usdRate = parseFloat(usdRateStr.replace(',', ''))
+
+    return {
+        USD: usdRate
+    }
 }
 
 export const getGlobalPriceURI = (theme: ColorSchemeName = 'dark') => {
@@ -121,44 +126,50 @@ export const getGlobalPrice = async (): Promise<GlobalPrice | undefined> => {
         },
         operationName: 'MetalQuote'
     }
-    const [res, exchangeRate] = await Promise.all([
+    const [res, exchangeRateVND] = await Promise.all([
         axios.post(url, body),
-        getExchangeRates()
+        getExchangeRateVND()
     ])
     const data = await res.data
     const globalPrice = data.data?.GetMetalQuoteV3?.results?.[0]?.bid
     const priceInOunceUSD =
         typeof globalPrice === 'number' ? globalPrice : toNumber(globalPrice)
     const priceInTaelUSD = priceInOunceUSD * taelPerOunceRate
-    const usdRate = exchangeRate?.USD || 0
+    const usdRate = exchangeRateVND?.USD || 0
     const priceInTaelVND = priceInTaelUSD * usdRate
 
-    return {
+    const result = {
         ounce: priceInOunceUSD,
         tael: priceInTaelUSD,
-        taelVND: priceInTaelVND,
-        exchangeRateVND: exchangeRate
+        exchangeRateVND,
+        taelVND: priceInTaelVND
     }
+
+    return result
 }
 
 export const getDomesticPrice = async (): Promise<DomesticPrice> => {
-    const [sjcPrice, pnjPrice, dojiPrice] = await Promise.all([
+    const [
+        sjcPrice,
+        dojiPrice
+        // pnjPrice
+    ] = await Promise.all([
         fetchSJCPrice(),
-        getPNJPrice(),
         getDOJIPrice()
+        // getPNJPrice()
     ])
 
-    const nmSell = dojiPrice.DOJI.sell - 7000000
-    const nmBuy = nmSell - 1500000
+    // const nmSell = dojiPrice.DOJI.sell - 7000000
+    // const nmBuy = nmSell - 1500000
 
     return {
         ...sjcPrice,
-        ...pnjPrice,
-        ...dojiPrice,
-        NM: {
-            buy: nmBuy,
-            sell: nmSell
-        }
+        ...dojiPrice
+        // ...pnjPrice,
+        // NM: {
+        //     buy: nmBuy,
+        //     sell: nmSell
+        // }
     }
 }
 
