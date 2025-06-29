@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Modal, ScrollView, TouchableOpacity } from 'react-native'
 import { useState } from 'react'
 import { ThemedText } from './ThemedText'
@@ -8,7 +8,7 @@ import { useThemeColor } from '@/hooks/useThemeColor'
 import { useColorScheme } from '@/hooks/useColorScheme'
 import { IconSymbol } from './ui/IconSymbol'
 
-type DropdownOption = {
+export type DropdownOption = {
     label: string
     value: string | number
 }
@@ -16,13 +16,22 @@ type DropdownOption = {
 interface DropdownModalProps {
     options: DropdownOption[]
     onChange: (selected: DropdownOption) => void
+    placeholder?: string
 }
 
-const DropdownModal: React.FC<DropdownModalProps> = ({ options, onChange }) => {
+const DropdownModal: React.FC<DropdownModalProps> = ({
+    placeholder,
+    options,
+    onChange
+}) => {
     const [visible, setVisible] = useState(false)
-    const [selected, setSelected] = useState<DropdownOption>()
+    const [selected, setSelected] = useState<DropdownOption | null>()
     const themedColor = useThemeColor({}, 'text')
     const theme = useColorScheme() ?? 'light'
+
+    useEffect(() => {
+        setSelected(null)
+    }, [options])
 
     return (
         <ThemedView style={styles.wrapper}>
@@ -36,7 +45,9 @@ const DropdownModal: React.FC<DropdownModalProps> = ({ options, onChange }) => {
                 ]}
                 onPress={() => setVisible(true)}
             >
-                <ThemedText>{selected?.label || 'Select...'}</ThemedText>
+                <ThemedText>
+                    {selected?.label || placeholder || 'Select...'}
+                </ThemedText>
                 <IconSymbol
                     name={visible ? 'chevron.up' : 'chevron.down'}
                     size={18}

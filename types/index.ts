@@ -97,3 +97,8 @@ export interface ILotteryDrawTable {
     price1: number[]
     priceS: number[]
 }
+
+export interface ILotteryDrawResult {
+    pageTitle: string
+    dataTables: ILotteryDrawTable[]
+}
