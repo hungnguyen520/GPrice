@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Platform } from 'react-native'
+import { ActivityIndicator, StyleSheet } from 'react-native'
 import ParallaxScrollView from '@/components/ParallaxScrollView'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
@@ -7,38 +7,30 @@ import axios from 'axios'
 import { FileLogger } from 'react-native-file-logger'
 import { useEffect, useState } from 'react'
 import { stripHtmlTags } from '@/utils/stringFormat'
-import { useSelector } from 'react-redux'
-import { RootState } from '@/store'
 import DropdownModal from '@/components/DropdownModal'
 import { CHANNEL_SELECTION } from '@/constants/lottery.constant'
+import { PriceView } from '@/components/PriceView'
+import { ILotteryDrawTable } from '@/types'
 
-interface ILotteryDrawTable {
-    day: string
-    date: string
-    code: string
-    price8: number[]
-    price7: number[]
-    price6: number[]
-    price5: number[]
-    price4: number[]
-    price3: number[]
-    price2: number[]
-    price1: number[]
-    priceS: number[]
+interface ILotteryDrawResult {
+    pageTitle: string
+    dataTables: ILotteryDrawTable[]
 }
 
 export default function Sample() {
-    const pageData = useSelector((state: RootState) => state.appData)
     const [drawableURL, setDrawableURL] = useState<string>()
+    const [result, setResult] = useState<ILotteryDrawResult | null>()
 
-    const getXSMN = async () => {
-        const url =
-            'https://www.minhngoc.net.vn/ket-qua-xo-so/mien-nam/dong-nai.html'
-
+    const getXSMN = async (url: string): Promise<ILotteryDrawResult> => {
         const response = await axios.get(url)
         const data = await response.data
 
         const xml = new XMLParser().parseFromString(data)
+
+        const pageTitles: any[] = xml
+            .getElementsByTagName('h1')
+            .filter((i) => i.attributes?.class === 'pagetitle')
+
         const xmlTables: any[] = xml
             .getElementsByTagName('table')
             .filter((i) => i.attributes?.class === 'bkqtinhmiennam')
@@ -63,10 +55,10 @@ export default function Sample() {
             const price7 = dataTds.find((i) => i.attributes?.class === 'giai7')
             const price8 = dataTds.find((i) => i.attributes?.class === 'giai8')
 
-            const dataTable = {
+            const dataTable: ILotteryDrawTable = {
                 day: day?.children[0]?.value,
                 date: stripHtmlTags(date?.value)?.slice(-10),
-                code: code?.value,
+                code: code?.value?.split(':')?.[1]?.trim(),
                 priceS: priceS?.children?.map((i) => i.value),
                 price1: price1?.children?.map((i) => i.value),
                 price2: price2?.children?.map((i) => i.value),
@@ -82,11 +74,23 @@ export default function Sample() {
 
             FileLogger.debug(JSON.stringify(dataTable))
         })
+
+        const _result = {
+            pageTitle: pageTitles?.[0]?.value,
+            dataTables
+        }
+
+        setResult(_result)
+
+        return _result
     }
 
     useEffect(() => {
-        // getXSMN()
-    }, [pageData])
+        if (drawableURL) {
+            setResult(null)
+            getXSMN(drawableURL)
+        }
+    }, [drawableURL])
 
     return (
         <ParallaxScrollView
@@ -94,37 +98,33 @@ export default function Sample() {
             headerHeight={50}
             backgroundImage={require('@/assets/images/hd-city-2nd-tab2.jpg')}
         >
-            <ThemedView style={styles.titleContainer}>
+            <ThemedView>
                 <DropdownModal
                     options={CHANNEL_SELECTION}
                     onChange={({ value }) => setDrawableURL(value as string)}
                 />
             </ThemedView>
-            <ThemedText>{drawableURL}</ThemedText>
+            <ThemedText style={styles.drawableURL}>{drawableURL}</ThemedText>
+            {result && (
+                <>
+                    <ThemedText style={styles.title} type="subtitle">
+                        {result?.pageTitle}
+                    </ThemedText>
+                    {result?.dataTables?.map((dataTable: ILotteryDrawTable) => {
+                        return <PriceView {...dataTable} key={dataTable.date} />
+                    })}
+                </>
+            )}
+            {result === null && <ActivityIndicator size="large" />}
         </ParallaxScrollView>
     )
 }
 
 const styles = StyleSheet.create({
-    titleContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-        backgroundColor: 'transparent'
+    title: {
+        textAlign: 'center'
     },
-    stepContainer: {
-        gap: 8,
-        marginBottom: 8,
-        backgroundColor: 'transparent'
-    },
-    reactLogo: {
-        height: 119,
-        width: 194,
-        bottom: 0,
-        left: 0,
-        position: 'absolute'
-    },
-    collapseContainer: {
-        backgroundColor: 'transparent'
+    drawableURL: {
+        marginBottom: 20
     }
 })

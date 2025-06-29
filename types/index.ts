@@ -82,3 +82,18 @@ export interface HistoricalViewModel {
         nm: number
     }
 }
+
+export interface ILotteryDrawTable {
+    day: string
+    date: string
+    code: string
+    price8: number[]
+    price7: number[]
+    price6: number[]
+    price5: number[]
+    price4: number[]
+    price3: number[]
+    price2: number[]
+    price1: number[]
+    priceS: number[]
+}

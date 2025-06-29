@@ -11,38 +11,39 @@ import getHistory from '@/utils/getHistory'
 const GPrice = () => {
     const pageData = useSelector((state: RootState) => state.appData)
 
-    const sjcRBuy = pageData.domesticPrice?.SJC_R?.buy || 0
     const dojiBuy = pageData.domesticPrice?.DOJI?.buy || 0
+    // const sjcRBuy = pageData.domesticPrice?.SJC_R?.buy || 0
     // const sjcBuy = pageData.domesticPrice?.SJC?.buy || 0
     // const pnjBuy = pageData.domesticPrice?.PNJ?.buy || 0
     // const nmBuy = pageData.domesticPrice?.NM?.buy || 0
 
     const { historyTable, historySum, avgBuy, quantity } = getHistory
 
-    const presentSjcRValue = quantity.sjcR * sjcRBuy
     const presentDojiValue = quantity.doji * dojiBuy
+    // const presentSjcRValue = quantity.sjcR * sjcRBuy
     // const presentSjcValue = summary.quantity.sjc * sjcBuy
     // const presentPnjValue = summary.quantity.pnj * pnjBuy
     // const presentNmValue = summary.quantity.nm * nmBuy
 
-    const sumPresentBuy = presentSjcRValue + presentDojiValue
+    const sumPresentBuy = presentDojiValue
+    // presentSjcRValue +
     // presentSjcValue +
     // presentPnjValue +
     // presentNmValue
 
     const presentTable = [
         {
-            group: GGroup.SJC_R,
-            buy: formatPrice(sjcRBuy),
-            quantity: quantity.sjcR,
-            value: formatPrice(presentSjcRValue)
-        },
-        {
             group: `${GGroup.DOJI}`,
             buy: formatPrice(dojiBuy),
             quantity: quantity.doji,
             value: formatPrice(presentDojiValue)
         }
+        // {
+        //     group: GGroup.SJC_R,
+        //     buy: formatPrice(sjcRBuy),
+        //     quantity: quantity.sjcR,
+        //     value: formatPrice(presentSjcRValue)
+        // },
         // {
         //     group: GGroup.SJC,
         //     buy: formatPrice(sjcBuy),

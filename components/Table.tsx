@@ -1,7 +1,7 @@
 import React from 'react'
 import { View, StyleSheet, StyleProp, TextStyle } from 'react-native'
 import { ThemedText } from './ThemedText'
-import Divider from './Devider'
+import Divider from './Divider'
 
 const sampleData = [
     { id: 1, name: 'John Doe', age: 28, city: 'New York' },
