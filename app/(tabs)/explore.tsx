@@ -10,8 +10,9 @@ import { TextInput } from '@/components/TextInput'
 import { ILotteryDrawResult, ILotteryDrawTable } from '@/types'
 import { fetchXSMN } from '@/utils/xsmn'
 import { cloneDeep } from 'lodash'
+import CustomButton from '@/components/CustomButton'
 
-export default function Sample() {
+export default function Explore() {
     const [result, setResult] = useState<ILotteryDrawResult | null>()
     const [dateOptions, setDateOptions] = useState<DropdownOption[]>([])
     const [searchedTable, setSearchedTable] =
@@ -20,13 +21,15 @@ export default function Sample() {
         useState<ILotteryDrawTable | null>()
 
     const resetPage = () => {
-        setResult(null)
+        setResult(undefined)
         setSelectedTable(null)
         setSearchedTable(null)
+        setDateOptions([])
     }
 
     const onSelectURL = (drawableURL: string) => {
         resetPage()
+        setResult(null) // For loading
         fetchXSMN(drawableURL).then((r) => {
             const { dataTables } = r
             const dates = dataTables.map((d) => {
@@ -123,6 +126,13 @@ export default function Sample() {
                     {renderingTables?.map((dataTable: ILotteryDrawTable) => {
                         return <PriceView {...dataTable} key={dataTable.date} />
                     })}
+                    <CustomButton
+                        iconName="arrow.2.circlepath"
+                        borderColor={'white'}
+                        iconColor={'white'}
+                        backgroundColor={'transparent'}
+                        onPress={() => resetPage()}
+                    />
                 </>
             )}
             {result === null && <ActivityIndicator size="large" />}
