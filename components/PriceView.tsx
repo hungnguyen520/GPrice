@@ -29,8 +29,8 @@ export const PriceView = (props: ILotteryDrawTable) => {
                         <ThemedText>{table.label}</ThemedText>
                     </View>
                     <View style={styles.lineValues}>
-                        {table.values.map((p) => (
-                            <ThemedText style={styles.LineNumber} key={p}>
+                        {table.values.map((p, idx) => (
+                            <ThemedText style={styles.LineNumber} key={idx}>
                                 {p}
                             </ThemedText>
                         ))}
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         backgroundColor: 'rgba(255, 255, 255, 0.25)',
-        padding: 16,
+        padding: 12,
         borderColor: '#ccc',
         borderBottomWidth: StyleSheet.hairlineWidth
     },
@@ -66,6 +66,7 @@ const styles = StyleSheet.create({
     },
     lineLabel: {
         flex: 1,
+        minHeight: 40,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
@@ -76,8 +77,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         flexWrap: 'wrap',
-        gap: 12,
-        padding: 16
+        columnGap: 12,
+        rowGap: 6,
+        padding: 8
     },
     LineNumber: {
         fontSize: 18,
