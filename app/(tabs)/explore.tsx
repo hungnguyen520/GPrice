@@ -1,16 +1,16 @@
-import { ActivityIndicator, StyleSheet } from 'react-native'
+import CustomButton from '@/components/CustomButton'
 import ParallaxScrollView from '@/components/ParallaxScrollView'
+import { PriceView } from '@/components/PriceView'
+import SelectDropdown, { DropdownOption } from '@/components/SelectDropdown'
+import { TextInput } from '@/components/TextInput'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
-import { useState } from 'react'
-import DropdownModal, { DropdownOption } from '@/components/DropdownModal'
 import { CHANNEL_SELECTION } from '@/constants/lottery.constant'
-import { PriceView } from '@/components/PriceView'
-import { TextInput } from '@/components/TextInput'
 import { ILotteryDrawResult, ILotteryDrawTable } from '@/types'
 import { fetchXSMN } from '@/utils/xsmn'
 import { cloneDeep } from 'lodash'
-import CustomButton from '@/components/CustomButton'
+import { useState } from 'react'
+import { ActivityIndicator, StyleSheet } from 'react-native'
 
 export default function Explore() {
     const [result, setResult] = useState<ILotteryDrawResult | null>()
@@ -95,13 +95,15 @@ export default function Explore() {
             backgroundImage={require('@/assets/images/hd-city-2nd-tab2.jpg')}
         >
             <ThemedView style={styles.selections}>
-                <DropdownModal
+                <SelectDropdown
+                    key={'channel'}
                     style={styles.dropdown}
                     options={CHANNEL_SELECTION}
                     onChange={({ value }) => onSelectURL(value as string)}
                     placeholder={'Channel...'}
                 />
-                <DropdownModal
+                <SelectDropdown
+                    key={'date'}
                     style={styles.dropdown}
                     options={dateOptions}
                     onChange={({ value }) => onSelectDate(value as string)}

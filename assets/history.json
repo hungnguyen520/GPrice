@@ -2,18 +2,6 @@
     "data": [
         {
             "group": "DOJI",
-            "buy": 91.2,
-            "quantity": 2.7,
-            "date": "10-Feb-2025"
-        },
-        {
-            "group": "DOJI",
-            "buy": 91.4,
-            "quantity": 6.3,
-            "date": "11-Feb-2025"
-        },
-        {
-            "group": "DOJI",
             "buy": 90.3,
             "quantity": 1,
             "date": "16-Feb-2025"
