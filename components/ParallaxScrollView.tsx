@@ -1,11 +1,14 @@
-import React from 'react'
+import { ThemedView } from '@/components/ThemedView'
+import { useBottomTabOverflow } from '@/components/ui/TabBarBackground'
+import { useColorScheme } from '@/hooks/useColorScheme'
 import type { PropsWithChildren, ReactElement } from 'react'
+import React from 'react'
 import {
+    Image,
+    ImageSourcePropType,
     RefreshControl,
     StyleSheet,
-    Image,
-    View,
-    ImageSourcePropType
+    View
 } from 'react-native'
 import Animated, {
     interpolate,
@@ -13,11 +16,6 @@ import Animated, {
     useAnimatedStyle,
     useScrollViewOffset
 } from 'react-native-reanimated'
-
-import { ThemedView } from '@/components/ThemedView'
-import { useBottomTabOverflow } from '@/components/ui/TabBarBackground'
-import { useColorScheme } from '@/hooks/useColorScheme'
-import { BlurView } from '@react-native-community/blur'
 
 const HEADER_HEIGHT = 180
 
@@ -85,12 +83,7 @@ export default function ParallaxScrollView({
                 resizeMode="cover"
                 style={styles.absolute}
             />
-            <BlurView
-                style={styles.absolute}
-                blurType="dark"
-                blurAmount={2}
-                reducedTransparencyFallbackColor="white"
-            />
+            <View style={styles.absolute} />
             <Animated.ScrollView
                 ref={scrollRef}
                 scrollEventThrottle={16}
@@ -136,7 +129,9 @@ const styles = StyleSheet.create({
         top: 0,
         left: 0,
         width: '100%',
-        height: '100%'
+        height: '100%',
+        backgroundColor: 'black',
+        opacity: 0.5
     },
     content: {
         flex: 1,

@@ -1,42 +1,42 @@
+import { useColorScheme } from '@/hooks/useColorScheme'
 import {
     DarkTheme,
     DefaultTheme,
     ThemeProvider
-} from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { FileLogger } from 'react-native-file-logger';
-import { store } from '../store';
-import { Provider } from 'react-redux';
+} from '@react-navigation/native'
+import { useFonts } from 'expo-font'
+import { Stack } from 'expo-router'
+import * as SplashScreen from 'expo-splash-screen'
+import { StatusBar } from 'expo-status-bar'
+import { useEffect } from 'react'
+import { FileLogger } from 'react-native-file-logger'
+import 'react-native-reanimated'
+import { Provider } from 'react-redux'
+import { store } from '../store'
 
 FileLogger.configure({
     logsDirectory: '/Users/hungnguyen/root/gprice/logs',
     maximumFileSize: 1024 * 100,
     captureConsole: false
-});
+})
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync()
 
 function RootLayout() {
-    const colorScheme = useColorScheme();
+    const colorScheme = useColorScheme()
     const [loaded] = useFonts({
         SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf')
-    });
+    })
 
     useEffect(() => {
         if (loaded) {
-            SplashScreen.hideAsync();
+            SplashScreen.hideAsync()
         }
-    }, [loaded]);
+    }, [loaded])
 
     if (!loaded) {
-        return null;
+        return null
     }
 
     return (
@@ -56,7 +56,7 @@ function RootLayout() {
                 </>
             </Provider>
         </ThemeProvider>
-    );
+    )
 }
 
-export default RootLayout;
+export default RootLayout
