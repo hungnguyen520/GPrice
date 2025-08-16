@@ -1,22 +1,22 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import { Text, ActivityIndicator, StyleSheet, View } from 'react-native'
-import ParallaxScrollView from '@/components/ParallaxScrollView'
-import Table from '@/components/Table'
-import {
-    getGlobalPrice,
-    getGlobalPriceURI,
-    getDomesticPrice
-} from '@/utils/apiFetch'
-import { IPageData } from '@/types'
-import { WebView } from 'react-native-webview'
-import commonStyles from '@/styles'
 import CustomButton from '@/components/CustomButton'
+import ParallaxScrollView from '@/components/ParallaxScrollView'
+import { SafeWebView } from '@/components/SafeWebView'
+import Table from '@/components/Table'
+import { ThemedText } from '@/components/ThemedText'
 import { useColorScheme } from '@/hooks/useColorScheme'
-import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store'
 import { setAppData } from '@/store/appDataSlice'
-import { ThemedText } from '@/components/ThemedText'
+import commonStyles from '@/styles'
+import { IPageData } from '@/types'
+import {
+    getDomesticPrice,
+    getGlobalPrice,
+    getGlobalPriceURI
+} from '@/utils/apiFetch'
 import { formatNumber, formatPrice } from '@/utils/numberFormat'
+import React, { useCallback, useEffect, useState } from 'react'
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
 
 const getPageData = async () => {
     const data: IPageData = {}
@@ -108,10 +108,7 @@ const Home = () => {
                             {err}
                         </Text>
                     ))}
-                    <WebView
-                        source={{ uri: encodedUrl }}
-                        style={styles.webview}
-                    />
+                    <SafeWebView uri={encodedUrl} style={styles.webview} />
                     <View>
                         <View style={styles.globalPriceItem}>
                             <TextLarge>Ounce</TextLarge>
