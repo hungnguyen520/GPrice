@@ -149,27 +149,23 @@ export const getGlobalPrice = async (): Promise<GlobalPrice | undefined> => {
 }
 
 export const getDomesticPrice = async (): Promise<DomesticPrice> => {
-    const [
-        sjcPrice,
-        dojiPrice
-        // pnjPrice
-    ] = await Promise.all([
+    const [sjcPrice, dojiPrice, pnjPrice] = await Promise.all([
         fetchSJCPrice(),
-        getDOJIPrice()
-        // getPNJPrice()
+        getDOJIPrice(),
+        getPNJPrice()
     ])
 
-    // const nmSell = dojiPrice.DOJI.sell - 7000000
-    // const nmBuy = nmSell - 1500000
+    const nmSell = dojiPrice.DOJI.sell - 7000000
+    const nmBuy = nmSell - 1500000
 
     return {
         ...sjcPrice,
-        ...dojiPrice
-        // ...pnjPrice,
-        // NM: {
-        //     buy: nmBuy,
-        //     sell: nmSell
-        // }
+        ...dojiPrice,
+        ...pnjPrice,
+        NM: {
+            buy: nmBuy,
+            sell: nmSell
+        }
     }
 }
 

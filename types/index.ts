@@ -43,7 +43,7 @@ export type ExchangeRateVND = Partial<Record<Currency, number>>
 
 export interface HistoricalRecord {
     group: GGroup
-    buy: number
+    value: number
     quantity: number
     date: string
 }
@@ -52,7 +52,6 @@ export interface HistoricalData {
     data: HistoricalRecord[]
     excluded: {
         quantity: number
-        value: number
     }
 }
 export interface IPageData {
@@ -61,18 +60,17 @@ export interface IPageData {
 }
 
 export interface HistoricalViewModel {
-    historyTable: {
+    data: {
         group: GGroup
-        buy: number
+        value: number
         quantity: number
-        value: string
+        total: string
         date: string
     }[]
-    historySum: {
-        quantity: number
-        value: number
+    value: {
+        avg: number
+        sum: number
     }
-    avgBuy: number
     quantity: {
         total: number
         sjc: number
@@ -80,6 +78,9 @@ export interface HistoricalViewModel {
         pnj: number
         doji: number
         nm: number
+    }
+    excluded: {
+        quantity: number
     }
 }
 

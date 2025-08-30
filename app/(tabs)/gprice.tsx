@@ -1,35 +1,42 @@
 import ParallaxScrollView from '@/components/ParallaxScrollView'
+import Table from '@/components/Table'
 import { RootState } from '@/store'
+import { GGroup } from '@/types'
+import getHistory from '@/utils/getHistory'
+import { formatNumber, formatPrice } from '@/utils/numberFormat'
 import React from 'react'
 import { StyleSheet } from 'react-native'
 import { useSelector } from 'react-redux'
-import { GGroup } from '@/types'
-import Table from '@/components/Table'
-import { formatNumber, formatPrice } from '@/utils/numberFormat'
-import getHistory from '@/utils/getHistory'
 
 const GPrice = () => {
     const pageData = useSelector((state: RootState) => state.appData)
 
     const dojiBuy = pageData.domesticPrice?.DOJI?.buy || 0
-    // const sjcRBuy = pageData.domesticPrice?.SJC_R?.buy || 0
-    // const sjcBuy = pageData.domesticPrice?.SJC?.buy || 0
-    // const pnjBuy = pageData.domesticPrice?.PNJ?.buy || 0
-    // const nmBuy = pageData.domesticPrice?.NM?.buy || 0
+    const sjcRBuy = pageData.domesticPrice?.SJC_R?.buy || 0
+    const sjcBuy = pageData.domesticPrice?.SJC?.buy || 0
+    const pnjBuy = pageData.domesticPrice?.PNJ?.buy || 0
+    const nmBuy = pageData.domesticPrice?.NM?.buy || 0
 
-    const { historyTable, historySum, avgBuy, quantity } = getHistory
+    const {
+        data: historyData,
+        value: { avg: avgHistoryValue, sum: sumHistoryValue },
+        quantity,
+        excluded
+    } = getHistory
 
     const presentDojiValue = quantity.doji * dojiBuy
-    // const presentSjcRValue = quantity.sjcR * sjcRBuy
-    // const presentSjcValue = summary.quantity.sjc * sjcBuy
-    // const presentPnjValue = summary.quantity.pnj * pnjBuy
-    // const presentNmValue = summary.quantity.nm * nmBuy
+    const presentSjcRValue = quantity.sjcR * sjcRBuy
+    const presentSjcValue = quantity.sjc * sjcBuy
+    const presentPnjValue = quantity.pnj * pnjBuy
+    const presentNmValue = quantity.nm * nmBuy
 
-    const sumPresentBuy = presentDojiValue
-    // presentSjcRValue +
-    // presentSjcValue +
-    // presentPnjValue +
-    // presentNmValue
+    const sumPresentValue =
+        (presentDojiValue +
+            presentSjcRValue +
+            presentSjcValue +
+            presentPnjValue +
+            presentNmValue) /
+        1000000
 
     const presentTable = [
         {
@@ -37,34 +44,36 @@ const GPrice = () => {
             buy: formatPrice(dojiBuy),
             quantity: quantity.doji,
             value: formatPrice(presentDojiValue)
+        },
+        {
+            group: GGroup.SJC_R,
+            buy: formatPrice(sjcRBuy),
+            quantity: quantity.sjcR,
+            value: formatPrice(presentSjcRValue)
+        },
+        {
+            group: GGroup.SJC,
+            buy: formatPrice(sjcBuy),
+            quantity: quantity.sjc,
+            value: formatPrice(presentSjcValue)
+        },
+        {
+            group: `${GGroup.PNJ}`,
+            buy: formatPrice(pnjBuy),
+            quantity: quantity.pnj,
+            value: formatPrice(presentPnjValue)
+        },
+        {
+            group: `${GGroup.NM}`,
+            buy: formatPrice(nmBuy),
+            quantity: quantity.nm,
+            value: formatPrice(presentNmValue)
         }
-        // {
-        //     group: GGroup.SJC_R,
-        //     buy: formatPrice(sjcRBuy),
-        //     quantity: quantity.sjcR,
-        //     value: formatPrice(presentSjcRValue)
-        // },
-        // {
-        //     group: GGroup.SJC,
-        //     buy: formatPrice(sjcBuy),
-        //     quantity: summary.quantity.sjc,
-        //     value: formatPrice(presentSjcValue)
-        // },
-        // {
-        //     group: `${GGroup.PNJ}`,
-        //     buy: formatPrice(pnjBuy),
-        //     quantity: summary.quantity.pnj,
-        //     value: formatPrice(presentPnjValue)
-        // },
-        // {
-        //     group: `${GGroup.NM}`,
-        //     buy: formatPrice(nmBuy),
-        //     quantity: summary.quantity.nm,
-        //     value: formatPrice(presentNmValue)
-        // }
     ]
 
-    const profitValue = sumPresentBuy / 1000000 - historySum.value
+    const excludedValue = (excluded.quantity * sjcRBuy) / 1000000
+
+    const profitValue = sumPresentValue - excludedValue - sumHistoryValue
 
     const profitTable = [
         {
@@ -75,22 +84,34 @@ const GPrice = () => {
 
     const presentSumTable = [
         {
+            title: 'Excluded',
+            quantity: excluded.quantity,
+            value: formatNumber(excludedValue)
+        },
+        {
             title: 'Current',
             quantity: quantity.total,
-            value: formatPrice(sumPresentBuy)
+            value: formatNumber(sumPresentValue)
+        },
+        {
+            title: 'Net',
+            quantity:
+                Math.round((quantity.total - excluded.quantity) * 10) / 10,
+            value: formatNumber(sumPresentValue - excludedValue)
         }
     ]
 
     const historySumTable = [
         {
             title: 'History',
-            ...historySum
+            quantity: quantity.total,
+            value: formatNumber(sumHistoryValue)
         }
     ]
     const avgBuyTable = [
         {
-            title: 'Avg Buy',
-            value: formatNumber(avgBuy)
+            title: 'Avg History Buy',
+            value: formatNumber(avgHistoryValue)
         }
     ]
 
@@ -150,7 +171,7 @@ const GPrice = () => {
                 ]}
             />
             <Table
-                data={historyTable}
+                data={historyData}
                 fontSize={13}
                 columnCellStyle={[
                     { textAlign: 'left' },
