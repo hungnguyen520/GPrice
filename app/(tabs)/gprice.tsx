@@ -3,101 +3,105 @@ import Table from '@/components/Table'
 import { RootState } from '@/store'
 import { GGroup } from '@/types'
 import getHistory from '@/utils/getHistory'
-import { formatNumber, formatPrice } from '@/utils/numberFormat'
+import { formatNumber } from '@/utils/numberFormat'
 import React from 'react'
-import { StyleSheet } from 'react-native'
 import { useSelector } from 'react-redux'
 
 const GPrice = () => {
     const pageData = useSelector((state: RootState) => state.appData)
 
-    const dojiBuy = pageData.domesticPrice?.DOJI?.buy || 0
-    const sjcRBuy = pageData.domesticPrice?.SJC_R?.buy || 0
-    const sjcBuy = pageData.domesticPrice?.SJC?.buy || 0
-    const pnjBuy = pageData.domesticPrice?.PNJ?.buy || 0
-    const nmBuy = pageData.domesticPrice?.NM?.buy || 0
+    const dojiBuy = (pageData.domesticPrice?.DOJI?.buy || 0) / 1000000
+    const sjcRBuy = (pageData.domesticPrice?.SJC_R?.buy || 0) / 1000000
+    const sjcBuy = (pageData.domesticPrice?.SJC?.buy || 0) / 1000000
+    const pnjBuy = (pageData.domesticPrice?.PNJ?.buy || 0) / 1000000
+    const nmBuy = (pageData.domesticPrice?.NM?.buy || 0) / 1000000
 
     const {
         data: historyData,
         value: { avg: avgHistoryValue, sum: sumHistoryValue },
         quantity,
-        excluded
+        excluded: { quantity: excludedQuantity }
     } = getHistory
 
-    const presentDojiValue = quantity.doji * dojiBuy
-    const presentSjcRValue = quantity.sjcR * sjcRBuy
-    const presentSjcValue = quantity.sjc * sjcBuy
-    const presentPnjValue = quantity.pnj * pnjBuy
-    const presentNmValue = quantity.nm * nmBuy
+    const currentDojiValue = quantity.doji * dojiBuy
+    const currentSjcRValue = quantity.sjcR * sjcRBuy
+    const currentSjcValue = quantity.sjc * sjcBuy
+    const currentPnjValue = quantity.pnj * pnjBuy
+    const currentNmValue = quantity.nm * nmBuy
 
-    const sumPresentValue =
-        (presentDojiValue +
-            presentSjcRValue +
-            presentSjcValue +
-            presentPnjValue +
-            presentNmValue) /
-        1000000
+    const sumCurrentValue =
+        currentDojiValue +
+        currentSjcRValue +
+        currentSjcValue +
+        currentPnjValue +
+        currentNmValue
 
-    const presentTable = [
+    const currentTable = [
         {
             group: `${GGroup.DOJI}`,
-            buy: formatPrice(dojiBuy),
+            buy: formatNumber(dojiBuy),
             quantity: quantity.doji,
-            value: formatPrice(presentDojiValue)
+            value: formatNumber(currentDojiValue)
         },
         {
             group: GGroup.SJC_R,
-            buy: formatPrice(sjcRBuy),
+            buy: formatNumber(sjcRBuy),
             quantity: quantity.sjcR,
-            value: formatPrice(presentSjcRValue)
+            value: formatNumber(currentSjcRValue)
         },
         {
             group: GGroup.SJC,
-            buy: formatPrice(sjcBuy),
+            buy: formatNumber(sjcBuy),
             quantity: quantity.sjc,
-            value: formatPrice(presentSjcValue)
+            value: formatNumber(currentSjcValue)
         },
         {
             group: `${GGroup.PNJ}`,
-            buy: formatPrice(pnjBuy),
+            buy: formatNumber(pnjBuy),
             quantity: quantity.pnj,
-            value: formatPrice(presentPnjValue)
+            value: formatNumber(currentPnjValue)
         },
         {
             group: `${GGroup.NM}`,
-            buy: formatPrice(nmBuy),
+            buy: formatNumber(nmBuy),
             quantity: quantity.nm,
-            value: formatPrice(presentNmValue)
+            value: formatNumber(currentNmValue)
         }
     ]
 
-    const excludedValue = (excluded.quantity * sjcRBuy) / 1000000
+    const currentExcludedValue = excludedQuantity * sjcRBuy
+    const historyExcludedValue = excludedQuantity * avgHistoryValue
 
-    const profitValue = sumPresentValue - excludedValue - sumHistoryValue
+    const grossProfitValue = sumCurrentValue - sumHistoryValue
+    const netProfitValue =
+        grossProfitValue - (currentExcludedValue - historyExcludedValue)
 
     const profitTable = [
         {
             title: 'Profit',
-            value: formatNumber(profitValue)
+            value: formatNumber(grossProfitValue)
+        },
+        {
+            title: 'Profit net',
+            value: formatNumber(netProfitValue)
         }
     ]
 
-    const presentSumTable = [
-        {
-            title: 'Excluded',
-            quantity: excluded.quantity,
-            value: formatNumber(excludedValue)
-        },
+    const currentSumTable = [
         {
             title: 'Current',
             quantity: quantity.total,
-            value: formatNumber(sumPresentValue)
+            value: formatNumber(sumCurrentValue)
+        },
+        {
+            title: 'Excluded',
+            quantity: excludedQuantity,
+            value: formatNumber(currentExcludedValue)
         },
         {
             title: 'Net',
-            quantity:
-                Math.round((quantity.total - excluded.quantity) * 10) / 10,
-            value: formatNumber(sumPresentValue - excludedValue)
+            quantity: Math.round((quantity.total - excludedQuantity) * 10) / 10,
+            value: formatNumber(sumCurrentValue - currentExcludedValue)
         }
     ]
 
@@ -130,7 +134,7 @@ const GPrice = () => {
                 ]}
             />
             <Table
-                data={presentSumTable}
+                data={currentSumTable}
                 noHeaderRow
                 noLines
                 columnCellStyle={[
@@ -140,7 +144,7 @@ const GPrice = () => {
                 ]}
             />
             <Table
-                data={presentTable}
+                data={currentTable}
                 columnCellStyle={[
                     { textAlign: 'left' },
                     { textAlign: 'right' },
@@ -184,14 +188,5 @@ const GPrice = () => {
         </ParallaxScrollView>
     )
 }
-
-const styles = StyleSheet.create({
-    flexContainer: {
-        flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingHorizontal: 6
-    }
-})
 
 export default GPrice

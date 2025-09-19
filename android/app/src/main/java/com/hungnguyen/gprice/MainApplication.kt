@@ -1,4 +1,4 @@
-package com.anonymous.gprice
+package com.hungnguyen.gprice
 
 import android.app.Application
 import android.content.res.Configuration

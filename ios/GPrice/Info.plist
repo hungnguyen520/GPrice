@@ -28,7 +28,7 @@
         <key>CFBundleURLSchemes</key>
         <array>
           <string>myapp</string>
-          <string>com.anonymous.gprice</string>
+          <string>com.hungnguyen.gprice</string>
         </array>
       </dict>
     </array>

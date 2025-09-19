@@ -1,4 +1,4 @@
-package com.anonymous.gprice
+package com.hungnguyen.gprice
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build
