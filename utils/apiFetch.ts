@@ -1,4 +1,4 @@
-import { DomesticPrice, ExchangeRateVND, GlobalPrice } from '@/types'
+import { DomesticPrice, ExchangeRateVND, GlobalPrice, IPageData } from '@/types'
 import axios from 'axios'
 import XMLParser from 'react-xml-parser'
 // import { FileLogger } from 'react-native-file-logger'
@@ -35,7 +35,7 @@ export const fetchSJCPrice = async () => {
     }
 }
 
-export const getPNJPrice = async () => {
+export const fetchPNJPrice = async () => {
     const url =
         'https://edge-api.pnj.io/ecom-frontend/v1/get-gold-price?zone=00'
     const res = await axios.get(url)
@@ -55,7 +55,7 @@ export const getPNJPrice = async () => {
     }
 }
 
-export const getDOJIPrice = async () => {
+export const fetchDOJIPrice = async () => {
     const url = 'http://update.giavang.doji.vn/banggia/doji_92411/92411'
 
     const res = await axios.get(url)
@@ -111,7 +111,7 @@ export const getGlobalPriceURI = (theme: ColorSchemeName = 'dark') => {
     return encodeURI(url + JSON.stringify(config))
 }
 
-export const getGlobalPrice = async (): Promise<GlobalPrice | undefined> => {
+export const fetchGlobalPrice = async (): Promise<GlobalPrice> => {
     // https://www.kitco.com/charts/gold
     const taelPerOunceRate = 1.215276995
     const url = 'https://kdb-gw.prod.kitco.com/'
@@ -148,25 +148,54 @@ export const getGlobalPrice = async (): Promise<GlobalPrice | undefined> => {
     return result
 }
 
-export const getDomesticPrice = async (): Promise<DomesticPrice> => {
-    const [sjcPrice, dojiPrice, pnjPrice] = await Promise.all([
-        fetchSJCPrice(),
-        getDOJIPrice(),
-        getPNJPrice()
-    ])
+export const fetchAllPrices = async (): Promise<IPageData> => {
+    const [sjcResult, dojiResult, pnjResult, globalResult] =
+        await Promise.allSettled([
+            fetchSJCPrice(),
+            fetchDOJIPrice(),
+            fetchPNJPrice(),
+            fetchGlobalPrice()
+        ])
 
-    const nmSell = dojiPrice.DOJI.sell - 7000000
-    const nmBuy = nmSell - 1500000
+    const domesticPrice: DomesticPrice = {}
+    let globalPrice: GlobalPrice = {} as any
+    const error: IPageData['error'] = {}
+
+    if (sjcResult.status === 'fulfilled') {
+        Object.assign(domesticPrice, sjcResult.value)
+    } else {
+        error.sjc = sjcResult.reason.toString()
+    }
+
+    if (dojiResult.status === 'fulfilled') {
+        Object.assign(domesticPrice, dojiResult.value)
+    } else {
+        error.doji = dojiResult.reason.toString()
+    }
+
+    if (pnjResult.status === 'fulfilled') {
+        Object.assign(domesticPrice, pnjResult.value)
+    } else {
+        error.pnj = pnjResult.reason.toString()
+    }
+
+    if (globalResult.status === 'fulfilled') {
+        globalPrice = globalResult.value
+    } else {
+        error.global = globalResult.reason.toString()
+    }
+
+    if (domesticPrice.SJC_R) {
+        const nmSell = domesticPrice.SJC_R.sell - 7000000
+        const nmBuy = nmSell - 1500000
+        Object.assign(domesticPrice, { NM: { buy: nmBuy, sell: nmSell } })
+    }
 
     return {
-        ...sjcPrice,
-        ...dojiPrice,
-        ...pnjPrice,
-        NM: {
-            buy: nmBuy,
-            sell: nmSell
-        }
+        domesticPrice,
+        globalPrice,
+        error
     }
 }
 
-export default getDomesticPrice
+export default fetchAllPrices

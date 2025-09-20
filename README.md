@@ -1,50 +1,39 @@
-# Welcome to your Expo app 👋
+# React Native – Enabling HTTP Requests (Non-HTTPS)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+By default, React Native apps block **plain HTTP** (non-HTTPS) requests for security reasons.  
+This behavior comes from:
 
-## Get started
+-   **iOS**: App Transport Security (ATS)
+-   **Android**: Cleartext traffic policy
 
-1. Install dependencies
+If you need to connect to a local development server or an API that only supports HTTP, you must configure both platforms.
 
-   ```bash
-   npm install
-   ```
+---
 
-2. Start the app
+## 📱 iOS Setup (App Transport Security)
 
-   ```bash
-    npx expo start
-   ```
+1. Open your project’s **Info.plist** file: ios/YourAppName/Info.plist
 
-In the output, you'll find options to open the app in a
+2. To allow **all HTTP requests** (not recommended for production), add:
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+```xml
+<key>NSAppTransportSecurity</key>
+<dict>
+  <key>NSAllowsArbitraryLoads</key>
+  <true/>
+</dict>
+<key>NSAppTransportSecurity</key>
+<dict>
+  <key>NSExceptionDomains</key>
+  <dict>
+    <key>example.com</key>
+    <dict>
+      <key>NSIncludesSubdomains</key>
+      <true/>
+      <key>NSExceptionAllowsInsecureHTTPLoads</key>
+      <true/>
+    </dict>
+  </dict>
+</dict>
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
 ```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.

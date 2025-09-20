@@ -57,6 +57,7 @@ export interface HistoricalData {
 export interface IPageData {
     domesticPrice?: DomesticPrice
     globalPrice?: GlobalPrice
+    error: Record<string, string>
 }
 
 export interface HistoricalViewModel {

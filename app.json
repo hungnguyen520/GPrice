@@ -11,7 +11,8 @@
         "ios": {
             "infoPlist": {
                 "NSAppTransportSecurity": {
-                    "NSAllowsArbitraryLoads": true
+                    "NSAllowsArbitraryLoads": true,
+                    "NSAllowsArbitraryLoadsInWebContent": true
                 }
             },
             "supportsTablet": true,

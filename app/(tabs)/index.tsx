@@ -8,41 +8,12 @@ import { RootState } from '@/store'
 import { setAppData } from '@/store/appDataSlice'
 import commonStyles from '@/styles'
 import { IPageData } from '@/types'
-import {
-    getDomesticPrice,
-    getGlobalPrice,
-    getGlobalPriceURI
-} from '@/utils/apiFetch'
+import fetchAllPrices, { getGlobalPriceURI } from '@/utils/apiFetch'
 import { formatNumber, formatPrice } from '@/utils/numberFormat'
+import { isEmpty } from 'lodash'
 import React, { useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
-
-const getPageData = async () => {
-    const data: IPageData = {}
-    const errors: string[] = []
-    const [vnRes, gloRes] = await Promise.allSettled([
-        getDomesticPrice(),
-        getGlobalPrice()
-    ])
-
-    if (vnRes.status === 'fulfilled') {
-        data.domesticPrice = vnRes.value
-    } else {
-        errors.push(vnRes.reason.toString())
-    }
-
-    if (gloRes.status === 'fulfilled') {
-        data.globalPrice = gloRes.value
-    } else {
-        errors.push(gloRes.reason.toString())
-    }
-
-    return {
-        data,
-        errors
-    }
-}
 
 const TextLarge = ({ fontSize = 18, ...rest }) => (
     <ThemedText style={{ fontSize, marginBottom: 6 }} {...rest} />
@@ -50,19 +21,19 @@ const TextLarge = ({ fontSize = 18, ...rest }) => (
 
 const Home = () => {
     const [loading, setLoading] = useState(true)
-    const [errors, setErrors] = useState<string[]>([])
+    const [error, setError] = useState<IPageData['error']>()
     const theme = useColorScheme() ?? 'dark'
     const pageData = useSelector((state: RootState) => state.appData)
     const dispatch = useDispatch()
 
     const refreshPage = useCallback(async (callback?: Function) => {
         setLoading(true)
-        const { data, errors } = await getPageData()
+        const data = await fetchAllPrices()
         if (data) {
             dispatch(setAppData(data))
         }
-        if (errors?.length) {
-            setErrors(errors)
+        if (!isEmpty(data?.error)) {
+            setError(data?.error)
         }
         setLoading(false)
         callback?.()
@@ -103,11 +74,12 @@ const Home = () => {
                 <ActivityIndicator size="large" />
             ) : (
                 <>
-                    {errors?.map((err, idx) => (
-                        <Text key={idx} style={commonStyles.error}>
-                            {err}
-                        </Text>
-                    ))}
+                    {error &&
+                        Object.entries(error).map(([key, value]) => (
+                            <Text key={key} style={commonStyles.error}>
+                                {key}: {value}
+                            </Text>
+                        ))}
                     <SafeWebView uri={encodedUrl} style={styles.webview} />
                     <View>
                         <View style={styles.globalPriceItem}>
@@ -133,19 +105,17 @@ const Home = () => {
                             </TextLarge>
                         </View>
                     </View>
-                    {domesticTableData?.length && (
-                        <View style={styles.tableContainer}>
-                            <Table
-                                data={domesticTableData}
-                                columnCellStyle={[
-                                    { textAlign: 'left' },
-                                    { textAlign: 'right' },
-                                    { textAlign: 'right' }
-                                ]}
-                                fontSize={18}
-                            />
-                        </View>
-                    )}
+                    <View style={styles.tableContainer}>
+                        <Table
+                            data={domesticTableData}
+                            columnCellStyle={[
+                                { textAlign: 'left' },
+                                { textAlign: 'right' },
+                                { textAlign: 'right' }
+                            ]}
+                            fontSize={18}
+                        />
+                    </View>
                     <CustomButton
                         iconName="arrow.2.circlepath"
                         borderColor={'green'}

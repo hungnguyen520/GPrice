@@ -4,7 +4,8 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 
 const initialState: IPageData = {
     domesticPrice: {} as any,
-    globalPrice: {} as any
+    globalPrice: {} as any,
+    error: {}
 }
 
 export const appDataSlice = createSlice({
@@ -14,6 +15,7 @@ export const appDataSlice = createSlice({
         setAppData: (state, action: PayloadAction<IPageData>) => {
             state.globalPrice = action.payload.globalPrice
             state.domesticPrice = action.payload.domesticPrice
+            state.error = action.payload.error
         }
     }
 })
