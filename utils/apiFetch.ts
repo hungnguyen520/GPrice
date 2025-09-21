@@ -56,15 +56,15 @@ export const fetchPNJPrice = async () => {
 }
 
 export const fetchDOJIPrice = async () => {
-    const url = 'http://update.giavang.doji.vn/banggia/doji_92411/92411'
+    const url = 'https://bang-gia-vang.trangsucdoji-ldp.workers.dev'
 
     const res = await axios.get(url)
-    const xml = await res.data
-    const xmlObj = new XMLParser().parseFromString(xml)
+    const data = await res.data
+    const xml = new XMLParser().parseFromString(data)
 
     const name = 'LED'
     const code = 'doji_3'
-    const priceTable = xmlObj?.children?.find((i) => i.name === name)
+    const priceTable = xml?.children?.find((i) => i.name === name)
     const price = priceTable?.children?.find((i) => i.attributes?.Key === code)
 
     const toIntNumber = (priceStr: string) =>
