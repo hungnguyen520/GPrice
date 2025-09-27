@@ -11,7 +11,6 @@ import { ThemedText } from './ThemedText'
 import { ThemedView } from './ThemedView'
 import { StyleSheet } from 'react-native'
 import { useThemeColor } from '@/hooks/useThemeColor'
-import { useColorScheme } from '@/hooks/useColorScheme'
 import { IconSymbol } from './ui/IconSymbol'
 
 export type DropdownOption = {
@@ -34,8 +33,7 @@ const DropdownModal: React.FC<DropdownModalProps> = ({
 }) => {
     const [visible, setVisible] = useState(false)
     const [selected, setSelected] = useState<DropdownOption | null>()
-    const themedColor = useThemeColor({}, 'text')
-    const theme = useColorScheme() ?? 'light'
+    const textColor = useThemeColor('text')
 
     useEffect(() => {
         setSelected(null)
@@ -48,7 +46,7 @@ const DropdownModal: React.FC<DropdownModalProps> = ({
                 style={[
                     styles.input,
                     {
-                        borderColor: themedColor
+                        borderColor: textColor
                     }
                 ]}
                 onPress={() => setVisible(true)}
@@ -59,7 +57,7 @@ const DropdownModal: React.FC<DropdownModalProps> = ({
                 <IconSymbol
                     name={visible ? 'chevron.up' : 'chevron.down'}
                     size={18}
-                    color={themedColor}
+                    color={textColor}
                 />
             </TouchableOpacity>
 
@@ -73,8 +71,7 @@ const DropdownModal: React.FC<DropdownModalProps> = ({
                             style={[
                                 styles.scrollView,
                                 {
-                                    backgroundColor:
-                                        theme === 'dark' ? '#333' : 'white'
+                                    backgroundColor: textColor
                                 }
                             ]}
                         >

@@ -1,6 +1,6 @@
 import { ThemedView } from '@/components/ThemedView'
 import { useBottomTabOverflow } from '@/components/ui/TabBarBackground'
-import { useColorScheme } from '@/hooks/useColorScheme'
+import { useThemeColor } from '@/hooks/useThemeColor'
 import type { PropsWithChildren, ReactElement } from 'react'
 import React from 'react'
 import {
@@ -20,7 +20,6 @@ import Animated, {
 const HEADER_HEIGHT = 180
 
 type Props = PropsWithChildren<{
-    headerBackgroundColor: { dark: string; light: string }
     headerImage?: ReactElement
     onRefresh?: (callback?: Function) => void
     headerHeight?: number
@@ -30,12 +29,11 @@ type Props = PropsWithChildren<{
 export default function ParallaxScrollView({
     children,
     headerImage,
-    headerBackgroundColor,
     onRefresh,
     headerHeight = HEADER_HEIGHT,
-    backgroundImage
+    backgroundImage = require('@/assets/images/hd-city-home-tab.jpg')
 }: Props) {
-    const colorScheme = useColorScheme() ?? 'light'
+    const backgroundColor = useThemeColor('background')
     const scrollRef = useAnimatedRef<Animated.ScrollView>()
     const scrollOffset = useScrollViewOffset(scrollRef)
     const bottom = useBottomTabOverflow()
@@ -60,14 +58,11 @@ export default function ParallaxScrollView({
         }
     })
 
-    const _backgroundImage =
-        backgroundImage ?? require('@/assets/images/hd-city-home-tab.jpg')
-
     return (
         <ThemedView style={styles.container}>
             <Image
                 key={'blurryImage'}
-                source={_backgroundImage}
+                source={backgroundImage}
                 resizeMode="cover"
                 style={styles.absolute}
             />
@@ -88,8 +83,7 @@ export default function ParallaxScrollView({
                             styles.header,
                             { height: headerHeight },
                             {
-                                backgroundColor:
-                                    headerBackgroundColor[colorScheme]
+                                backgroundColor: backgroundColor
                             },
                             headerAnimatedStyle
                         ]}

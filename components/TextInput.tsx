@@ -5,11 +5,15 @@ import { StyleSheet } from 'react-native'
 
 export const TextInput = (props: TextInputProps) => {
     const { style, ...rest } = props
-    const color = useThemeColor({}, 'text')
+    const textColor = useThemeColor('text')
 
     return (
         <NativeTextInput
-            style={[styles.input, { color, borderColor: color }, style]}
+            style={[
+                styles.input,
+                { color: textColor, borderColor: textColor },
+                style
+            ]}
             {...rest}
         />
     )

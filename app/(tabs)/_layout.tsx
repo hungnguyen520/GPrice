@@ -3,19 +3,18 @@ import React from 'react'
 import { Platform } from 'react-native'
 import { HapticTab } from '@/components/HapticTab'
 import { IconSymbol } from '@/components/ui/IconSymbol'
-import { Colors } from '@/constants/Colors'
-import { useColorScheme } from '@/hooks/useColorScheme'
+import { useThemeColor } from '@/hooks/useThemeColor'
 
 function TabLayout() {
-    const colorScheme = useColorScheme()
+    const tintColor = useThemeColor('tint')
 
     return (
         <Tabs
             screenOptions={{
-                tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+                tabBarActiveTintColor: tintColor,
                 headerShown: false,
                 tabBarButton: HapticTab,
-                // tabBarBackground: TabBarBackground,
+                // tabBarBackground: undefined,
                 tabBarStyle: Platform.select({
                     ios: {
                         // Use a transparent background on iOS to show the blur effect

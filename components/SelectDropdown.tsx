@@ -24,8 +24,7 @@ const SelectDropdown: React.FC<SelectDropdownProps> = ({
     onChange,
     style
 }) => {
-    const themedColor = useThemeColor({}, 'text')
-    // const theme = useColorScheme() ?? 'light'
+    const textColor = useThemeColor('text')
 
     return (
         <NativeSelectDropdown
@@ -37,7 +36,7 @@ const SelectDropdown: React.FC<SelectDropdownProps> = ({
                         style={[
                             styles.input,
                             {
-                                borderColor: themedColor
+                                borderColor: textColor
                             }
                         ]}
                     >
@@ -47,7 +46,7 @@ const SelectDropdown: React.FC<SelectDropdownProps> = ({
                         <IconSymbol
                             name={isOpened ? 'chevron.up' : 'chevron.down'}
                             size={18}
-                            color={themedColor}
+                            color={textColor}
                         />
                     </ThemedView>
                 )

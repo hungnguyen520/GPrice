@@ -3,7 +3,7 @@ import ParallaxScrollView from '@/components/ParallaxScrollView'
 import { SafeWebView } from '@/components/SafeWebView'
 import Table from '@/components/Table'
 import { ThemedText } from '@/components/ThemedText'
-import { useColorScheme } from '@/hooks/useColorScheme'
+import { useColorScheme } from 'react-native'
 import { RootState } from '@/store'
 import { setAppData } from '@/store/appDataSlice'
 import commonStyles from '@/styles'
@@ -67,11 +67,7 @@ const Home = () => {
     }, [])
 
     return (
-        <ParallaxScrollView
-            headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-            onRefresh={refreshPage}
-            headerHeight={50}
-        >
+        <ParallaxScrollView onRefresh={refreshPage} headerHeight={50}>
             {loading ? (
                 <ActivityIndicator size="large" />
             ) : (
