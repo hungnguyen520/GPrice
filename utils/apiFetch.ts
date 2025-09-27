@@ -62,10 +62,10 @@ export const fetchDOJIPrice = async () => {
     const data = await res.data
     const xml = new XMLParser().parseFromString(data)
 
-    const name = 'LED'
-    const code = 'doji_3'
-    const priceTable = xml?.children?.find((i) => i.name === name)
-    const price = priceTable?.children?.find((i) => i.attributes?.Key === code)
+    const priceTable = xml?.children?.find((i) => i.name === 'LED')
+    const price = priceTable?.children?.find(
+        (i) => i.attributes?.Key === 'doji_2'
+    )
 
     const toIntNumber = (priceStr: string) =>
         priceStr ? parseInt(priceStr.replace(/,/g, '')) * 10000 : 0
@@ -114,24 +114,15 @@ export const getGlobalPriceURI = (theme: ColorSchemeName = 'dark') => {
 export const fetchGlobalPrice = async (): Promise<GlobalPrice> => {
     // https://www.kitco.com/charts/gold
     const taelPerOunceRate = 1.215276995
-    const url = 'https://kdb-gw.prod.kitco.com/'
-    const query =
-        'fragment MetalFragment on Metal{ID symbol currency name results{...MetalQuoteFragment}}fragment MetalQuoteFragment on Quote{ID ask bid change changePercentage close high low mid open originalTime timestamp unit}query MetalQuote($symbol:String! $currency:String! $timestamp:Int){GetMetalQuoteV3(symbol:$symbol currency:$currency timestamp:$timestamp){...MetalFragment}}'
-    const body = {
-        query,
-        variables: {
-            symbol: 'AU',
-            currency: 'USD',
-            timestamp: Math.floor(Date.now() / 1000)
-        },
-        operationName: 'MetalQuote'
-    }
-    const [res, exchangeRateVND] = await Promise.all([
-        axios.post(url, body),
+    const url = 'https://data-asg.goldprice.org/dbXRates/USD'
+
+    const [globalRes, exchangeRateVND] = await Promise.all([
+        axios.get(url),
         getExchangeRateVND()
     ])
-    const data = await res.data
-    const globalPrice = data.data?.GetMetalQuoteV3?.results?.[0]?.bid
+    const data = await globalRes.data
+
+    const globalPrice = data?.items?.find((i) => i.curr === 'USD')?.xauPrice
     const priceInOunceUSD =
         typeof globalPrice === 'number' ? globalPrice : toNumber(globalPrice)
     const priceInTaelUSD = priceInOunceUSD * taelPerOunceRate

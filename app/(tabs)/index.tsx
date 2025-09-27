@@ -54,10 +54,12 @@ const Home = () => {
     }
 
     const globalPriceFormatted = {
-        ounce: formatNumber(pageData?.globalPrice?.ounce || 0, 2),
-        tael: formatNumber(pageData?.globalPrice?.tael || 0, 2),
-        usdRate: formatNumber(pageData?.globalPrice?.exchangeRateVND?.USD || 0),
-        taelVND: formatPrice(pageData?.globalPrice?.taelVND || 0)
+        ounce: formatNumber(Number(pageData?.globalPrice?.ounce)),
+        tael: formatNumber(Number(pageData?.globalPrice?.tael)),
+        usdRate: formatNumber(
+            Number(pageData?.globalPrice?.exchangeRateVND?.USD)
+        ),
+        taelVND: formatPrice(Number(pageData?.globalPrice?.taelVND))
     }
 
     useEffect(() => {
