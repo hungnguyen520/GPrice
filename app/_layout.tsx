@@ -9,11 +9,11 @@ import { Stack } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { StatusBar } from 'expo-status-bar'
 import { useEffect } from 'react'
-import { FileLogger } from 'react-native-file-logger'
 import 'react-native-reanimated'
 import { Provider } from 'react-redux'
 import { store } from '../store'
 
+import { FileLogger } from 'react-native-file-logger'
 FileLogger.configure({
     logsDirectory: '/Users/hungnguyen/root/gprice/logs',
     maximumFileSize: 1024 * 100,

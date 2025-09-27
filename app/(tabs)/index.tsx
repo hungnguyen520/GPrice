@@ -83,25 +83,29 @@ const Home = () => {
                             </Text>
                         ))}
                     <SafeWebView uri={encodedUrl} style={styles.webview} />
+                    {/* <View style={styles.usdOzPrice}>
+                            <TextLarge>USD Ounce</TextLarge>
+                            <TextLarge fontSize={26} type="semiBold">
+                                {globalPriceFormatted.ounce}
+                            </TextLarge>
+                        </View> */}
                     <View>
                         <View style={styles.globalPriceItem}>
-                            <TextLarge>Ounce</TextLarge>
+                            <TextLarge>USD Ounce</TextLarge>
                             <TextLarge>{globalPriceFormatted.ounce}</TextLarge>
                         </View>
                         <View style={styles.globalPriceItem}>
-                            <TextLarge>Tael</TextLarge>
+                            <TextLarge>USD Tael</TextLarge>
                             <TextLarge>{globalPriceFormatted.tael}</TextLarge>
                         </View>
                         <View style={styles.globalPriceItem}>
-                            <TextLarge style={{ fontSize: 20 }}>
-                                Rate USD
-                            </TextLarge>
+                            <TextLarge>USD Exchange</TextLarge>
                             <TextLarge>
                                 {globalPriceFormatted.usdRate}
                             </TextLarge>
                         </View>
                         <View style={styles.globalPriceItem}>
-                            <TextLarge>Tael VND</TextLarge>
+                            <TextLarge>VND Tael</TextLarge>
                             <TextLarge>
                                 {globalPriceFormatted.taelVND}
                             </TextLarge>
@@ -145,6 +149,18 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'row',
         justifyContent: 'space-between'
+    },
+    usdOzPrice: {
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 12,
+        borderColor: '#ccc',
+        borderWidth: StyleSheet.hairlineWidth,
+        marginBottom: 20,
+        padding: 10,
+        borderRadius: 5
     }
 })
 

@@ -22,7 +22,7 @@ const HEADER_HEIGHT = 180
 type Props = PropsWithChildren<{
     headerBackgroundColor: { dark: string; light: string }
     headerImage?: ReactElement
-    onRefresh?: (callback: Function) => void
+    onRefresh?: (callback?: Function) => void
     headerHeight?: number
     backgroundImage?: ImageSourcePropType
 }>
@@ -59,18 +59,6 @@ export default function ParallaxScrollView({
             ]
         }
     })
-    const [refreshing, setRefreshing] = React.useState(false)
-
-    const _onRefresh = React.useCallback(() => {
-        if (onRefresh) {
-            setRefreshing(true)
-            const callback = () => setRefreshing(false)
-            onRefresh(callback)
-        }
-        // setTimeout(() => {
-        //     setRefreshing(false);
-        // }, 3000);
-    }, [])
 
     const _backgroundImage =
         backgroundImage ?? require('@/assets/images/hd-city-home-tab.jpg')
@@ -91,7 +79,7 @@ export default function ParallaxScrollView({
                 contentContainerStyle={{ paddingBottom: bottom }}
                 horizontal={false}
                 refreshControl={
-                    <RefreshControl refreshing={false} onRefresh={_onRefresh} />
+                    <RefreshControl refreshing={false} onRefresh={onRefresh} />
                 }
             >
                 {headerImage ? (

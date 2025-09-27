@@ -57,7 +57,6 @@ export const SafeWebView: React.FC<SafeWebViewProps> = ({
                     window.confirm = function() {};
                 `}
             />
-            {/* <ThemedText>{uri}</ThemedText> */}
         </>
     )
 }
