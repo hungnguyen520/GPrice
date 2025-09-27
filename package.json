@@ -7,8 +7,9 @@
         "prebuild": "expo prebuild",
         "android": "expo run:android",
         "ios": "expo run:ios",
-        "pod": "cd ios && pod install",
-        "release": "yarn pod && xcodebuild -workspace ios/GPrice.xcworkspace -scheme GPrice -configuration Release -sdk iphoneos -derivedDataPath ios/build && ios-deploy --id 00008140-0010686414E2801C --bundle ios/build/Build/Products/Release-iphoneos/GPrice.app --justlaunch"
+        "pod-de": "cd ios && pod deintegrate",
+        "pod": "cd ios && pod install --repo-update",
+        "release": "xcodebuild -workspace ios/GPrice.xcworkspace -scheme GPrice -configuration Release -sdk iphoneos -derivedDataPath ios/build && ios-deploy --id 00008140-0010686414E2801C --bundle ios/build/Build/Products/Release-iphoneos/GPrice.app --justlaunch"
     },
     "jest": {
         "preset": "jest-expo"
