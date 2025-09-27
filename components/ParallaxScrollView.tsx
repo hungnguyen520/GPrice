@@ -64,7 +64,7 @@ export default function ParallaxScrollView({
                 key={'blurryImage'}
                 source={backgroundImage}
                 resizeMode="cover"
-                style={styles.absolute}
+                style={[styles.absolute, { backgroundColor }]}
             />
             <View style={styles.absolute} />
             <Animated.ScrollView
@@ -112,8 +112,7 @@ const styles = StyleSheet.create({
         left: 0,
         width: '100%',
         height: '100%',
-        backgroundColor: 'black',
-        opacity: 0.5
+        opacity: 0.3
     },
     content: {
         flex: 1,

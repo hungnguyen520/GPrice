@@ -121,7 +121,6 @@ const GPrice = () => {
 
     return (
         <ParallaxScrollView
-            headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
             headerHeight={50}
             backgroundImage={require('@/assets/images/hd-city-2nd-tab3.jpg')}
         >
