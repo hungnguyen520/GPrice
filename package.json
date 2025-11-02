@@ -9,7 +9,7 @@
         "ios": "expo run:ios",
         "pod-de": "cd ios && pod deintegrate",
         "pod": "cd ios && pod install --repo-update",
-        "release": "xcodebuild -workspace ios/GPrice.xcworkspace -scheme GPrice -configuration Release -sdk iphoneos -derivedDataPath ios/build && ios-deploy --id 00008140-0010686414E2801C --bundle ios/build/Build/Products/Release-iphoneos/GPrice.app --justlaunch"
+        "release": "xcodebuild -workspace ios/GPrice.xcworkspace -scheme GPrice -configuration Release -sdk iphoneos -allowProvisioningUpdates -allowProvisioningDeviceRegistration DEVELOPMENT_TEAM=3R7PLHQUT9 -derivedDataPath ios/build && (ios-deploy --id 00008140-0010686414E2801C --bundle ios/build/Build/Products/Release-iphoneos/GPrice.app --justlaunch || true)"
     },
     "jest": {
         "preset": "jest-expo"
