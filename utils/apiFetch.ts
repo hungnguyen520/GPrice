@@ -1,7 +1,13 @@
-import { DomesticPrice, ExchangeRateVND, GlobalPrice, IPageData } from '@/types'
+import {
+    DomesticPrice,
+    ExchangeRateVND,
+    GlobalPrice,
+    IPageData,
+    PriceError
+} from '@/types'
 import axios from 'axios'
 import XMLParser from 'react-xml-parser'
-// import { FileLogger } from 'react-native-file-logger'
+import { FileLogger } from 'react-native-file-logger'
 import { ColorSchemeName } from 'react-native'
 import { toNumber } from './numberFormat'
 
@@ -81,6 +87,21 @@ export const fetchDOJIPrice = async () => {
     }
 }
 
+export const fetchDOJIPriceXML = async () => {
+    // const url = 'https://giavang.org/trong-nuoc/doji/'
+    // const res = await axios.get(url)
+    // const data = await res.data
+    // try {
+    //     const xml = new XMLParser().parseFromString(data)
+    //     FileLogger.debug(xml)
+    //     const xmlTables: any[] = xml
+    //         .getElementsByTagName('div')
+    //         .filter((i) => i.attributes?.class === 'gold-price-box')
+    // } catch (e: any) {
+    //     FileLogger.debug(e.toString())
+    // }
+}
+
 export const getExchangeRateVND = async (): Promise<ExchangeRateVND> => {
     const url =
         'https://portal.vietcombank.com.vn/Usercontrols/TVPortal.TyGia/pXML.aspx?b=10'
@@ -139,7 +160,11 @@ export const fetchGlobalPrice = async (): Promise<GlobalPrice> => {
     return result
 }
 
-export const fetchAllPrices = async (): Promise<IPageData> => {
+interface IData extends IPageData {
+    error: PriceError
+}
+
+export const fetchAllPrices = async (): Promise<IData> => {
     const [sjcResult, dojiResult, pnjResult, globalResult] =
         await Promise.allSettled([
             fetchSJCPrice(),
@@ -150,7 +175,7 @@ export const fetchAllPrices = async (): Promise<IPageData> => {
 
     const domesticPrice: DomesticPrice = {}
     let globalPrice: GlobalPrice = {} as any
-    const error: IPageData['error'] = {}
+    const error: PriceError = {}
 
     if (sjcResult.status === 'fulfilled') {
         Object.assign(domesticPrice, sjcResult.value)

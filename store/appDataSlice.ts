@@ -1,25 +1,37 @@
-import { IPageData } from '@/types'
+import { DomesticPrice, GlobalPrice, IPageData } from '@/types'
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 
 const initialState: IPageData = {
-    domesticPrice: {} as any,
-    globalPrice: {} as any,
-    error: {}
+    domesticPrice: undefined,
+    globalPrice: undefined
 }
 
 export const appDataSlice = createSlice({
     name: 'appDataSlice',
     initialState,
     reducers: {
-        setAppData: (state, action: PayloadAction<IPageData>) => {
-            state.globalPrice = action.payload.globalPrice
-            state.domesticPrice = action.payload.domesticPrice
-            state.error = action.payload.error
+        setGlobalPrice: (state, action: PayloadAction<GlobalPrice>) => {
+            state.globalPrice = action.payload
+        },
+        setDomesticPrice: (state, action: PayloadAction<DomesticPrice>) => {
+            if (!state.domesticPrice) {
+                state.domesticPrice = action.payload
+            } else {
+                state.domesticPrice = {
+                    ...state.domesticPrice,
+                    ...action.payload
+                }
+            }
+        },
+        clearData: (state) => {
+            state.domesticPrice = undefined
+            state.globalPrice = undefined
         }
     }
 })
 
-export const { setAppData } = appDataSlice.actions
+export const { setGlobalPrice, setDomesticPrice, clearData } =
+    appDataSlice.actions
 
 export default appDataSlice.reducer

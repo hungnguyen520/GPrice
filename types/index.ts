@@ -13,18 +13,15 @@ export const enum Currency {
     USD = 'USD'
 }
 
+export type DomesticPriceValue = {
+    buy: number
+    sell: number
+}
+
 /**
  * The price unit is in million VND
  */
-export type DomesticPrice = Partial<
-    Record<
-        GGroup,
-        {
-            buy: number
-            sell: number
-        }
-    >
->
+export type DomesticPrice = Partial<Record<GGroup, DomesticPriceValue>>
 
 /**
  * The price unit is in USD
@@ -40,6 +37,13 @@ export type GlobalPrice = {
  * The price unit is in VND
  */
 export type ExchangeRateVND = Partial<Record<Currency, number>>
+
+export type PriceError = {
+    sjc?: string
+    doji?: string
+    pnj?: string
+    global?: string
+}
 
 export interface HistoricalRecord {
     group: GGroup
@@ -57,7 +61,6 @@ export interface HistoricalData {
 export interface IPageData {
     domesticPrice?: DomesticPrice
     globalPrice?: GlobalPrice
-    error: Record<string, string>
 }
 
 export interface HistoricalViewModel {
