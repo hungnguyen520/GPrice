@@ -13,7 +13,6 @@ import {
 import commonStyles from '@/styles'
 import { PriceError } from '@/types'
 import {
-    fetchDOJIPrice,
     fetchDOJIPriceXML,
     fetchGlobalPrice,
     fetchPNJPrice,
@@ -21,7 +20,7 @@ import {
     getGlobalPriceURI
 } from '@/utils/apiFetch'
 import { formatNumber, formatPrice } from '@/utils/numberFormat'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -36,18 +35,33 @@ const Home = () => {
     const pageData = useSelector((state: RootState) => state.appData)
     const dispatch = useDispatch()
 
+    const abortController = useRef<AbortController>()
+
+    const catchError = useCallback((key: keyof PriceError, error: any) => {
+        if (error.name !== 'CanceledError') {
+            setError((prev) => ({ ...prev, [key]: error.message }))
+        }
+    }, [])
+
+    const abortFetches = () => {
+        if (abortController.current) {
+            abortController.current.abort()
+        }
+    }
+
     const loadData = useCallback(async () => {
+        const controller = new AbortController()
+        abortController.current = controller
+
         // Fetch and set global price
-        fetchGlobalPrice()
+        fetchGlobalPrice(controller.signal)
             .then((data) => {
                 return dispatch(setGlobalPrice(data))
             })
-            .catch((error) => {
-                setError((prev) => ({ ...prev, global: error.toString() }))
-            })
+            .catch((error) => catchError('global', error))
 
         // Fetch and set sjc prices
-        fetchSJCPrice()
+        fetchSJCPrice(controller.signal)
             .then((data) => {
                 dispatch(setDomesticPrice(data))
                 if (data.SJC_R) {
@@ -57,29 +71,21 @@ const Home = () => {
                     dispatch(setDomesticPrice(nmData))
                 }
             })
-            .catch((error) => {
-                setError((prev) => ({ ...prev, sjc: error.toString() }))
-            })
+            .catch((error) => catchError('sjc', error))
 
         // Fetch and set doji prices
-        fetchDOJIPrice()
+        fetchDOJIPriceXML(controller.signal)
             .then((data) => {
                 dispatch(setDomesticPrice(data))
             })
-            .catch((error) => {
-                setError((prev) => ({ ...prev, doji: error.toString() }))
-            })
+            .catch((error) => catchError('doji', error))
 
         // Fetch and set pnj prices
-        fetchPNJPrice()
+        fetchPNJPrice(controller.signal)
             .then((data) => {
                 dispatch(setDomesticPrice(data))
             })
-            .catch((error) => {
-                setError((prev) => ({ ...prev, pnj: error.toString() }))
-            })
-
-        fetchDOJIPriceXML()
+            .catch((error) => catchError('pnj', error))
     }, [])
 
     const encodedUrl = useMemo(() => getGlobalPriceURI(theme), [theme])
@@ -115,9 +121,11 @@ const Home = () => {
 
     useEffect(() => {
         loadData()
+        return () => abortFetches()
     }, [])
 
     const refreshPage = () => {
+        abortFetches()
         setError({})
         dispatch(clearData())
         loadData()

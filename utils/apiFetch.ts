@@ -5,18 +5,18 @@ import {
     IPageData,
     PriceError
 } from '@/types'
-import axios from 'axios'
+import axios, { GenericAbortSignal } from 'axios'
 import XMLParser from 'react-xml-parser'
 import { FileLogger } from 'react-native-file-logger'
 import { ColorSchemeName } from 'react-native'
 import { toNumber } from './numberFormat'
 
-export const fetchSJCPrice = async () => {
+export const fetchSJCPrice = async (abortSignal: GenericAbortSignal) => {
     const goldBarId = 1
     const goldRingId = 49
     const url = 'https://sjc.com.vn/GoldPrice/Services/PriceService.ashx'
 
-    const res = await axios.get(url)
+    const res = await axios.get(url, { signal: abortSignal })
     const d = await res.data
 
     // const response = await axios.get('https://sjc.com.vn');
@@ -41,10 +41,10 @@ export const fetchSJCPrice = async () => {
     }
 }
 
-export const fetchPNJPrice = async () => {
+export const fetchPNJPrice = async (abortSignal: GenericAbortSignal) => {
     const url =
         'https://edge-api.pnj.io/ecom-frontend/v1/get-gold-price?zone=00'
-    const res = await axios.get(url)
+    const res = await axios.get(url, { signal: abortSignal })
     const d = await res.data
 
     const code = 'N24K'
@@ -61,10 +61,10 @@ export const fetchPNJPrice = async () => {
     }
 }
 
-export const fetchDOJIPrice = async () => {
+export const fetchDOJIPrice = async (abortSignal: GenericAbortSignal) => {
     const url = 'https://bang-gia-vang.trangsucdoji-ldp.workers.dev'
 
-    const res = await axios.get(url)
+    const res = await axios.get(url, { signal: abortSignal })
     const data = await res.data
     const xml = new XMLParser().parseFromString(data)
 
@@ -87,25 +87,38 @@ export const fetchDOJIPrice = async () => {
     }
 }
 
-export const fetchDOJIPriceXML = async () => {
-    // const url = 'https://giavang.org/trong-nuoc/doji/'
-    // const res = await axios.get(url)
-    // const data = await res.data
-    // try {
-    //     const xml = new XMLParser().parseFromString(data)
-    //     FileLogger.debug(xml)
-    //     const xmlTables: any[] = xml
-    //         .getElementsByTagName('div')
-    //         .filter((i) => i.attributes?.class === 'gold-price-box')
-    // } catch (e: any) {
-    //     FileLogger.debug(e.toString())
-    // }
+export const fetchDOJIPriceXML = async (abortSignal: GenericAbortSignal) => {
+    const url = 'https://giavang.org/trong-nuoc/doji/'
+    const res = await axios.get(url, { signal: abortSignal })
+    const data = await res.data
+
+    const sanitized = data.replace(/%(?![0-9A-Fa-f]{2})/g, '%25')
+
+    const xml = new XMLParser().parseFromString(sanitized)
+
+    const xmlPrices = xml
+        .getElementsByTagName('span')
+        .filter((i) => i.attributes?.class === 'gold-price')
+
+    const lastTwo = xmlPrices?.slice(-2)
+
+    const buy = lastTwo?.[0]?.value?.slice(0, 7) || '0'
+    const sell = lastTwo?.[1]?.value?.slice(0, 7) || '0'
+
+    return {
+        DOJI: {
+            buy: parseFloat(buy) * 1000000,
+            sell: parseFloat(sell) * 1000000
+        }
+    }
 }
 
-export const getExchangeRateVND = async (): Promise<ExchangeRateVND> => {
+export const getExchangeRateVND = async (
+    abortSignal: GenericAbortSignal
+): Promise<ExchangeRateVND> => {
     const url =
         'https://portal.vietcombank.com.vn/Usercontrols/TVPortal.TyGia/pXML.aspx?b=10'
-    const res = await axios.get(url)
+    const res = await axios.get(url, { signal: abortSignal })
     const d = await res.data
 
     const xml = new XMLParser().parseFromString(d)
@@ -132,14 +145,16 @@ export const getGlobalPriceURI = (theme: ColorSchemeName = 'dark') => {
     return encodeURI(url + JSON.stringify(config))
 }
 
-export const fetchGlobalPrice = async (): Promise<GlobalPrice> => {
+export const fetchGlobalPrice = async (
+    abortSignal: GenericAbortSignal
+): Promise<GlobalPrice> => {
     // https://www.kitco.com/charts/gold
     const taelPerOunceRate = 1.215276995
     const url = 'https://data-asg.goldprice.org/dbXRates/USD'
 
     const [globalRes, exchangeRateVND] = await Promise.all([
-        axios.get(url),
-        getExchangeRateVND()
+        axios.get(url, { signal: abortSignal }),
+        getExchangeRateVND(abortSignal)
     ])
     const data = await globalRes.data
 
@@ -164,13 +179,15 @@ interface IData extends IPageData {
     error: PriceError
 }
 
-export const fetchAllPrices = async (): Promise<IData> => {
+export const fetchAllPrices = async (
+    abortSignal: GenericAbortSignal
+): Promise<IData> => {
     const [sjcResult, dojiResult, pnjResult, globalResult] =
         await Promise.allSettled([
-            fetchSJCPrice(),
-            fetchDOJIPrice(),
-            fetchPNJPrice(),
-            fetchGlobalPrice()
+            fetchSJCPrice(abortSignal),
+            fetchDOJIPrice(abortSignal),
+            fetchPNJPrice(abortSignal),
+            fetchGlobalPrice(abortSignal)
         ])
 
     const domesticPrice: DomesticPrice = {}
