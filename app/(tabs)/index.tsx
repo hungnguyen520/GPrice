@@ -53,34 +53,24 @@ const Home = () => {
         const controller = new AbortController()
         abortController.current = controller
 
-        // Fetch and set global price
         fetchGlobalPrice(controller.signal)
             .then((data) => {
                 return dispatch(setGlobalPrice(data))
             })
             .catch((error) => catchError('global', error))
 
-        // Fetch and set sjc prices
         fetchSJCPrice(controller.signal)
             .then((data) => {
                 dispatch(setDomesticPrice(data))
-                if (data.SJC_R) {
-                    const nmSell = data.SJC_R.sell - 7000000
-                    const nmBuy = nmSell - 1500000
-                    const nmData = { NM: { buy: nmBuy, sell: nmSell } }
-                    dispatch(setDomesticPrice(nmData))
-                }
             })
             .catch((error) => catchError('sjc', error))
 
-        // Fetch and set doji prices
         fetchDOJIPriceXML(controller.signal)
             .then((data) => {
                 dispatch(setDomesticPrice(data))
             })
             .catch((error) => catchError('doji', error))
 
-        // Fetch and set pnj prices
         fetchPNJPrice(controller.signal)
             .then((data) => {
                 dispatch(setDomesticPrice(data))
@@ -94,8 +84,7 @@ const Home = () => {
         { group: 'SJC', buy: '-', sell: '-' },
         { group: 'SJC_R', buy: '-', sell: '-' },
         { group: 'DOJI', buy: '-', sell: '-' },
-        { group: 'PNJ', buy: '-', sell: '-' },
-        { group: 'NM', buy: '-', sell: '-' }
+        { group: 'PNJ', buy: '-', sell: '-' }
     ]
 
     if (pageData?.domesticPrice) {

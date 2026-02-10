@@ -14,27 +14,20 @@ const GPrice = () => {
     const sjcRBuy = (pageData.domesticPrice?.SJC_R?.buy || 0) / 1000000
     const sjcBuy = (pageData.domesticPrice?.SJC?.buy || 0) / 1000000
     const pnjBuy = (pageData.domesticPrice?.PNJ?.buy || 0) / 1000000
-    const nmBuy = (pageData.domesticPrice?.NM?.buy || 0) / 1000000
 
     const {
         data: historyData,
         value: { avg: avgHistoryValue, sum: sumHistoryValue },
-        quantity,
-        excluded: { quantity: excludedQuantity }
+        quantity
     } = getHistory
 
     const currentDojiValue = quantity.doji * dojiBuy
     const currentSjcRValue = quantity.sjcR * sjcRBuy
     const currentSjcValue = quantity.sjc * sjcBuy
     const currentPnjValue = quantity.pnj * pnjBuy
-    const currentNmValue = quantity.nm * nmBuy
 
     const sumCurrentValue =
-        currentDojiValue +
-        currentSjcRValue +
-        currentSjcValue +
-        currentPnjValue +
-        currentNmValue
+        currentDojiValue + currentSjcRValue + currentSjcValue + currentPnjValue
 
     const currentTable = [
         {
@@ -60,30 +53,15 @@ const GPrice = () => {
             buy: formatNumber(pnjBuy),
             quantity: quantity.pnj,
             value: formatNumber(currentPnjValue)
-        },
-        {
-            group: `${GGroup.NM}`,
-            buy: formatNumber(nmBuy),
-            quantity: quantity.nm,
-            value: formatNumber(currentNmValue)
         }
     ]
 
-    const currentExcludedValue = excludedQuantity * sjcRBuy
-    const historyExcludedValue = excludedQuantity * avgHistoryValue
-
-    const grossProfitValue = sumCurrentValue - sumHistoryValue
-    const netProfitValue =
-        grossProfitValue - (currentExcludedValue - historyExcludedValue)
+    const profitValue = sumCurrentValue - sumHistoryValue
 
     const profitTable = [
         {
             title: 'Profit',
-            value: formatNumber(grossProfitValue)
-        },
-        {
-            title: 'Profit net',
-            value: formatNumber(netProfitValue)
+            value: formatNumber(profitValue)
         }
     ]
 
@@ -92,16 +70,6 @@ const GPrice = () => {
             title: 'Current',
             quantity: quantity.total,
             value: formatNumber(sumCurrentValue)
-        },
-        {
-            title: 'Excluded',
-            quantity: excludedQuantity,
-            value: formatNumber(currentExcludedValue)
-        },
-        {
-            title: 'Net',
-            quantity: Math.round((quantity.total - excludedQuantity) * 10) / 10,
-            value: formatNumber(sumCurrentValue - currentExcludedValue)
         }
     ]
 

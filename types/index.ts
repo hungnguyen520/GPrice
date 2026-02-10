@@ -2,8 +2,7 @@ export const enum GGroup {
     SJC = 'SJC',
     SJC_R = 'SJC_R',
     DOJI = 'DOJI',
-    PNJ = 'PNJ',
-    NM = 'NM'
+    PNJ = 'PNJ'
 }
 
 export const enum Currency {
@@ -52,12 +51,6 @@ export interface HistoricalRecord {
     date: string
 }
 
-export interface HistoricalData {
-    data: HistoricalRecord[]
-    excluded: {
-        quantity: number
-    }
-}
 export interface IPageData {
     domesticPrice?: DomesticPrice
     globalPrice?: GlobalPrice
@@ -81,10 +74,6 @@ export interface HistoricalViewModel {
         sjcR: number
         pnj: number
         doji: number
-        nm: number
-    }
-    excluded: {
-        quantity: number
     }
 }
 
