@@ -11,7 +11,9 @@ import { FileLogger } from 'react-native-file-logger'
 import { ColorSchemeName } from 'react-native'
 import { toNumber } from './numberFormat'
 
-export const fetchSJCPrice = async (abortSignal: GenericAbortSignal) => {
+export const fetchSJCPrice = async (
+    abortSignal: GenericAbortSignal
+): Promise<DomesticPrice> => {
     const goldBarId = 1
     const goldRingId = 49
     const url = 'https://sjc.com.vn/GoldPrice/Services/PriceService.ashx'
@@ -41,7 +43,9 @@ export const fetchSJCPrice = async (abortSignal: GenericAbortSignal) => {
     }
 }
 
-export const fetchPNJPrice = async (abortSignal: GenericAbortSignal) => {
+export const fetchPNJPrice = async (
+    abortSignal: GenericAbortSignal
+): Promise<DomesticPrice> => {
     const url =
         'https://edge-api.pnj.io/ecom-frontend/v1/get-gold-price?zone=00'
     const res = await axios.get(url, { signal: abortSignal })
@@ -61,33 +65,9 @@ export const fetchPNJPrice = async (abortSignal: GenericAbortSignal) => {
     }
 }
 
-export const fetchDOJIPrice = async (abortSignal: GenericAbortSignal) => {
-    const url = 'https://bang-gia-vang.trangsucdoji-ldp.workers.dev'
-
-    const res = await axios.get(url, { signal: abortSignal })
-    const data = await res.data
-    const xml = new XMLParser().parseFromString(data)
-
-    const priceTable = xml?.children?.find((i) => i.name === 'LED')
-    const price = priceTable?.children?.find(
-        (i) => i.attributes?.Key === 'doji_2'
-    )
-
-    const toIntNumber = (priceStr: string) =>
-        priceStr ? parseInt(priceStr.replace(/,/g, '')) * 10000 : 0
-
-    const buy = toIntNumber(price?.attributes?.Buy)
-    const sell = toIntNumber(price?.attributes?.Sell)
-
-    return {
-        DOJI: {
-            buy,
-            sell
-        }
-    }
-}
-
-export const fetchDOJIPriceXML = async (abortSignal: GenericAbortSignal) => {
+export const fetchDOJIPriceXML = async (
+    abortSignal: GenericAbortSignal
+): Promise<DomesticPrice> => {
     const url = 'https://giavang.org/trong-nuoc/doji/'
     const res = await axios.get(url, { signal: abortSignal })
     const data = await res.data
@@ -113,6 +93,27 @@ export const fetchDOJIPriceXML = async (abortSignal: GenericAbortSignal) => {
     }
 }
 
+export const fetchGlobalPriceXML = async (
+    abortSignal: GenericAbortSignal
+): Promise<number> => {
+    const url = 'https://giavang.org/the-gioi/'
+    const res = await axios.get(url, { signal: abortSignal })
+    const data = await res.data
+
+    const sanitized = data.replace(/%(?![0-9A-Fa-f]{2})/g, '%25')
+
+    const xml = new XMLParser().parseFromString(sanitized)
+
+    const xmlPrices = xml
+        .getElementsByTagName('span')
+        .find((i) => i.attributes?.class === 'crypto-price')
+
+    const rawNumber = xmlPrices?.value || '0'
+    const parsedNumber = parseFloat(rawNumber.replace(/,/g, ''))
+
+    return parsedNumber
+}
+
 export const getExchangeRateVND = async (
     abortSignal: GenericAbortSignal
 ): Promise<ExchangeRateVND> => {
@@ -134,7 +135,9 @@ export const getExchangeRateVND = async (
     }
 }
 
-export const getGlobalPriceURI = (theme: ColorSchemeName = 'dark') => {
+export const getGlobalPriceWidgetURI = (
+    theme: ColorSchemeName = 'dark'
+): string => {
     const url =
         'https://www.tradingview-widget.com/embed-widget/single-quote/?locale=vi_VN#'
     const config = {
@@ -145,20 +148,16 @@ export const getGlobalPriceURI = (theme: ColorSchemeName = 'dark') => {
     return encodeURI(url + JSON.stringify(config))
 }
 
-export const fetchGlobalPrice = async (
+export const fetchGlobalPrices = async (
     abortSignal: GenericAbortSignal
 ): Promise<GlobalPrice> => {
-    // https://www.kitco.com/charts/gold
     const taelPerOunceRate = 1.215276995
-    const url = 'https://data-asg.goldprice.org/dbXRates/USD'
 
-    const [globalRes, exchangeRateVND] = await Promise.all([
-        axios.get(url, { signal: abortSignal }),
+    const [globalPrice, exchangeRateVND] = await Promise.all([
+        fetchGlobalPriceXML(abortSignal),
         getExchangeRateVND(abortSignal)
     ])
-    const data = await globalRes.data
 
-    const globalPrice = data?.items?.find((i) => i.curr === 'USD')?.xauPrice
     const priceInOunceUSD =
         typeof globalPrice === 'number' ? globalPrice : toNumber(globalPrice)
     const priceInTaelUSD = priceInOunceUSD * taelPerOunceRate
@@ -174,61 +173,3 @@ export const fetchGlobalPrice = async (
 
     return result
 }
-
-interface IData extends IPageData {
-    error: PriceError
-}
-
-export const fetchAllPrices = async (
-    abortSignal: GenericAbortSignal
-): Promise<IData> => {
-    const [sjcResult, dojiResult, pnjResult, globalResult] =
-        await Promise.allSettled([
-            fetchSJCPrice(abortSignal),
-            fetchDOJIPrice(abortSignal),
-            fetchPNJPrice(abortSignal),
-            fetchGlobalPrice(abortSignal)
-        ])
-
-    const domesticPrice: DomesticPrice = {}
-    let globalPrice: GlobalPrice = {} as any
-    const error: PriceError = {}
-
-    if (sjcResult.status === 'fulfilled') {
-        Object.assign(domesticPrice, sjcResult.value)
-    } else {
-        error.sjc = sjcResult.reason.toString()
-    }
-
-    if (dojiResult.status === 'fulfilled') {
-        Object.assign(domesticPrice, dojiResult.value)
-    } else {
-        error.doji = dojiResult.reason.toString()
-    }
-
-    if (pnjResult.status === 'fulfilled') {
-        Object.assign(domesticPrice, pnjResult.value)
-    } else {
-        error.pnj = pnjResult.reason.toString()
-    }
-
-    if (globalResult.status === 'fulfilled') {
-        globalPrice = globalResult.value
-    } else {
-        error.global = globalResult.reason.toString()
-    }
-
-    if (domesticPrice.SJC_R) {
-        const nmSell = domesticPrice.SJC_R.sell - 7000000
-        const nmBuy = nmSell - 1500000
-        Object.assign(domesticPrice, { NM: { buy: nmBuy, sell: nmSell } })
-    }
-
-    return {
-        domesticPrice,
-        globalPrice,
-        error
-    }
-}
-
-export default fetchAllPrices

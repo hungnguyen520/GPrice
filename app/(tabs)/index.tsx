@@ -14,10 +14,10 @@ import commonStyles from '@/styles'
 import { PriceError } from '@/types'
 import {
     fetchDOJIPriceXML,
-    fetchGlobalPrice,
+    fetchGlobalPrices,
     fetchPNJPrice,
     fetchSJCPrice,
-    getGlobalPriceURI
+    getGlobalPriceWidgetURI
 } from '@/utils/apiFetch'
 import { formatNumber, formatPrice } from '@/utils/numberFormat'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -36,6 +36,7 @@ const Home = () => {
     const dispatch = useDispatch()
 
     const abortController = useRef<AbortController>()
+    // const [widgetKey, setWidgetKey] = useState<number | null>(null)
 
     const catchError = useCallback((key: keyof PriceError, error: any) => {
         if (error.name !== 'CanceledError') {
@@ -53,7 +54,9 @@ const Home = () => {
         const controller = new AbortController()
         abortController.current = controller
 
-        fetchGlobalPrice(controller.signal)
+        // setWidgetKey(Date.now()) // Force re-mount SafeWebView to reload widget
+
+        fetchGlobalPrices(controller.signal)
             .then((data) => {
                 return dispatch(setGlobalPrice(data))
             })
@@ -78,7 +81,7 @@ const Home = () => {
             .catch((error) => catchError('pnj', error))
     }, [])
 
-    const encodedUrl = useMemo(() => getGlobalPriceURI(theme), [theme])
+    const encodedUrl = useMemo(() => getGlobalPriceWidgetURI(theme), [theme])
 
     const domesticTableData = [
         { group: 'SJC', buy: '-', sell: '-' },
